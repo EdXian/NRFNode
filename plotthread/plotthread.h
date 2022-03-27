@@ -3,6 +3,7 @@
 #include <QThread>
 #include <QObject>
 #include <qcustomplot/qcustomplot.h>
+#include "bleservices/thingy_service.h"
 class plotthread : public QObject
  {
      Q_OBJECT
@@ -16,8 +17,13 @@ class plotthread : public QObject
      uint32_t count =0;
      void configPlotter();
      void addGraph();
- public slots:
+
+     void resizeRange();
+
+
      void update_plot();
+ public :
+     void onAccDataReceieved(Points3D data);
 
  signals:
      void resultReady(const QString &result);

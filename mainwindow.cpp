@@ -4,11 +4,17 @@
 #include <iostream>
 #include <QDateTime>
 
+//Q_DECLARE_METATYPE(Points3D_t)
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    //qRegisterMetaType<Points3D>();
+    //qRegisterMetaType<Points3D_t>( "Points3D_t" );
+
     m_bleInterface = new BLEInterface(this);
 
     connect(m_bleInterface, &BLEInterface::dataReceived,
@@ -33,37 +39,26 @@ MainWindow::MainWindow(QWidget *parent) :
     });
 
     m_bleInterface->scanDevices();
-
-
+    thing_manager= new thingy_manager(0);
     plot_t = new plotthread();
     thread = new QThread();
     plot_t->moveToThread(thread);
     //
     plot_t->setPlotter(ui->plotwidget);
     plot_t->configPlotter();
-//    ui->plotwidget->addGraph();
-////    ui->plotwidget->graph(0).
-//    ui->plotwidget->addGraph();
-//    ui->plotwidget->addGraph();
-//    ui->plotwidget->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
-//    ui->plotwidget->xAxis->setLabel("x");
-//    ui->plotwidget->xAxis->setLabel("y");
-//    ui->plotwidget->graph(0)->setPen(QPen(QColor(255, 0, 0)));
-//    ui->plotwidget->graph(1)->setPen(QPen(QColor(0, 255, 0)));
-//    ui->plotwidget->graph(2)->setPen(QPen(QColor(0, 0, 255)));
 
-//    ui->plotwidget->graph(0)->setName("x");
-//    ui->plotwidget->graph(1)->setName("y");
-//    ui->plotwidget->graph(2)->setName("z");
-//    ui->plotwidget->legend->setVisible(true);
-//    // set axes ranges, so we see all data:
-
-//    ui->plotwidget->yAxis->setRange(-3000, 3000);
-//    ui->plotwidget->xAxis->setRange(0, 2000);
     count = 0;
     ui->battery_progressBar->setValue(0);
-}
 
+//    connect(thing_manager,SIGNAL(thingy_manager::onAccChanged(Points3D)),
+//            plot_t,SLOT(plotthread::onAccDataReceieved(Points3D)));
+
+    connect(thing_manager,&thingy_manager::onAccChanged,
+            this,&MainWindow::onrecv);
+}
+void MainWindow::onrecv(Points3D data){
+    plot_t->onAccDataReceieved(data);
+}
 MainWindow::~MainWindow()
 {
     delete ui;
@@ -79,11 +74,6 @@ void MainWindow::on_connectButton_clicked()
 {
     m_bleInterface->set_currentDevice(ui->devicesComboBox->currentIndex());
     m_bleInterface->connectCurrentDevice();
-
-
-//    foreach (i, m_bleInterface->currentService()) {
-//        printf("%s",i)
-//    }
 }
 
 
@@ -93,8 +83,8 @@ void MainWindow::on_sendButton_clicked()
 }
 void MainWindow::dataReceived(QPair<QLowEnergyCharacteristic, QByteArray> data){
 
-    thing_manager.handle(data);
-    plot_t->update_plot();
+    thing_manager->handle(data);
+   // plot_t->update_plot();
 }
 
 void MainWindow::on_servicesComboBox_currentIndexChanged(int index)
@@ -105,9 +95,4 @@ void MainWindow::on_servicesComboBox_currentIndexChanged(int index)
 void MainWindow::on_list_ch_Button_clicked()
 {
 
-
-
-//    if(m_bleInterface->isConnected()){
-//        m_bleInterface->list_Charateristics();
-//    }
 }

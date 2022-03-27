@@ -1,6 +1,7 @@
 #include "thingy_manager.h"
 
-thingy_manager::thingy_manager()
+thingy_manager::thingy_manager(QObject *parent):
+     QObject(parent)
 {
 
     motion_serv = new motion_service("motionService",motionService);
@@ -34,7 +35,7 @@ thingyServiceType thingy_manager::parseCharactType(QLowEnergyCharacteristic ch){
 
 void thingy_manager::handle(QPair<QLowEnergyCharacteristic, QByteArray> data){
     uint8_t handleServiceType=0;
-
+    Points3D acc;
     //determine which service used
     QLowEnergyCharacteristic charact = data.first;
     QByteArray bytes = data.second;
@@ -55,6 +56,8 @@ void thingy_manager::handle(QPair<QLowEnergyCharacteristic, QByteArray> data){
     case motionService:
 
         motion_serv->read_handler(charact, bytes);
+        acc = motion_serv->getAccValue();
+        emit onAccChanged(acc);
 
         break;
 

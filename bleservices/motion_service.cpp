@@ -1,6 +1,8 @@
 #include "motion_service.h"
 
 
+
+
 motion_service::motion_service(QString Name, thingyServiceType thingType_) :
     thingy_service(Name,thingType_)
 {
@@ -18,6 +20,12 @@ motion_service::motion_service(QString Name, thingyServiceType thingType_) :
     this->append_charact(QBluetoothUuid(QString(Motion_Gravity_Charact_UUID)));
 
 }
+
+Points3D motion_service::getAccValue(){
+    return Acc;
+}
+
+
 void motion_service::read_handler(QLowEnergyCharacteristic ch, QByteArray bytes){
     if(ch.uuid()==
             QBluetoothUuid(QString(Motion_Raw_Charact_UUID))
@@ -35,8 +43,13 @@ void motion_service::read_handler(QLowEnergyCharacteristic ch, QByteArray bytes)
          vec_y = (int16_t*)&leny[0];
          vec_z = (int16_t*)&lenz[0];
 
-         uint32_t timestamp=0;
-         printf("%ld, %d, %d, %d\n", timestamp, *vec_x, *vec_y, *vec_z);
+         //uint32_t timestamp=0;
+         //printf("%ld, %d, %d, %d\n", timestamp, *vec_x, *vec_y, *vec_z);
+
+         Acc.x = *vec_x;
+         Acc.y = *vec_y;
+         Acc.z = *vec_z;
+
     }
 }
 

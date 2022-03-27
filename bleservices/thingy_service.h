@@ -38,6 +38,22 @@
 #define Env_Configuration_UUID          "EF680206-9B35-4933-9B10-52FFA9740042"
 
 
+struct Points3D{
+    float x;
+    float y;
+    float z;
+};
+
+typedef Points3D Points3D_t ;
+Q_DECLARE_METATYPE(Points3D_t)
+struct Points4D{
+    float w;
+    float x;
+    float y;
+    float z;
+};
+
+
 enum thingyServiceType{
     NoneService=0,
     configService,
@@ -53,7 +69,7 @@ public:
     serviceName(data),
     thinType(thinType_)
     {
-
+        qRegisterMetaType<Points3D_t>( "Points3D_t" );
     }
     virtual void readChanged_hadler(){
 

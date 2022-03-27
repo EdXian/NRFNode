@@ -7,6 +7,7 @@
 #include "bleservices/motion_service.h"
 #include "bleservices/thingy_manager.h"
 #include "plotthread/plotthread.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -29,14 +30,14 @@ private slots:
     void on_servicesComboBox_currentIndexChanged(int index);
 
     void on_list_ch_Button_clicked();
-
+    void onrecv(Points3D data);
 private:
     uint32_t count;
     Ui::MainWindow *ui;
     BLEInterface *m_bleInterface;
     void dataReceived(QPair<QLowEnergyCharacteristic, QByteArray> data);
     //motion_service motion_ser;
-    thingy_manager thing_manager;
+    thingy_manager* thing_manager;
     plotthread *plot_t;
     QThread *thread;
 };
