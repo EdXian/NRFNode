@@ -33,26 +33,34 @@ MainWindow::MainWindow(QWidget *parent) :
     });
 
     m_bleInterface->scanDevices();
-    ui->plotwidget->addGraph();
-//    ui->plotwidget->graph(0).
-    ui->plotwidget->addGraph();
-    ui->plotwidget->addGraph();
-    ui->plotwidget->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
-    ui->plotwidget->xAxis->setLabel("x");
-    ui->plotwidget->xAxis->setLabel("y");
-    ui->plotwidget->graph(0)->setPen(QPen(QColor(255, 0, 0)));
-    ui->plotwidget->graph(1)->setPen(QPen(QColor(0, 255, 0)));
-    ui->plotwidget->graph(2)->setPen(QPen(QColor(0, 0, 255)));
 
-    ui->plotwidget->graph(0)->setName("x");
-    ui->plotwidget->graph(1)->setName("y");
-    ui->plotwidget->graph(2)->setName("z");
-    ui->plotwidget->legend->setVisible(true);
-    // set axes ranges, so we see all data:
+
+    plot_t = new plotthread();
+    thread = new QThread();
+    plot_t->moveToThread(thread);
+    //
+    plot_t->setPlotter(ui->plotwidget);
+    plot_t->configPlotter();
+//    ui->plotwidget->addGraph();
+////    ui->plotwidget->graph(0).
+//    ui->plotwidget->addGraph();
+//    ui->plotwidget->addGraph();
+//    ui->plotwidget->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
+//    ui->plotwidget->xAxis->setLabel("x");
+//    ui->plotwidget->xAxis->setLabel("y");
+//    ui->plotwidget->graph(0)->setPen(QPen(QColor(255, 0, 0)));
+//    ui->plotwidget->graph(1)->setPen(QPen(QColor(0, 255, 0)));
+//    ui->plotwidget->graph(2)->setPen(QPen(QColor(0, 0, 255)));
+
+//    ui->plotwidget->graph(0)->setName("x");
+//    ui->plotwidget->graph(1)->setName("y");
+//    ui->plotwidget->graph(2)->setName("z");
+//    ui->plotwidget->legend->setVisible(true);
+//    // set axes ranges, so we see all data:
+
+//    ui->plotwidget->yAxis->setRange(-3000, 3000);
+//    ui->plotwidget->xAxis->setRange(0, 2000);
     count = 0;
-    ui->plotwidget->yAxis->setRange(-3000, 3000);
-    ui->plotwidget->xAxis->setRange(0, 2000);
-
     ui->battery_progressBar->setValue(0);
 }
 
@@ -86,6 +94,7 @@ void MainWindow::on_sendButton_clicked()
 void MainWindow::dataReceived(QPair<QLowEnergyCharacteristic, QByteArray> data){
 
     thing_manager.handle(data);
+    plot_t->update_plot();
 }
 
 void MainWindow::on_servicesComboBox_currentIndexChanged(int index)

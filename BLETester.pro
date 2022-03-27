@@ -22,6 +22,7 @@ SOURCES += main.cpp\
     bleservices/ui_service.cpp \
         mainwindow.cpp \
     bleinterface.cpp \
+    plotthread/plotthread.cpp \
     qcustomplot/qcustomplot.cpp
 
 HEADERS  += mainwindow.h \
@@ -34,6 +35,7 @@ HEADERS  += mainwindow.h \
     bleservices/thingy_service.h \
     bleservices/ui_service.h \
     lib-qt-qml-tricks/src/qqmlhelpers.h \
+    plotthread/plotthread.h \
     qcustomplot/qcustomplot.h
 
 FORMS    += mainwindow.ui

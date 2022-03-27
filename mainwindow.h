@@ -6,6 +6,7 @@
 
 #include "bleservices/motion_service.h"
 #include "bleservices/thingy_manager.h"
+#include "plotthread/plotthread.h"
 namespace Ui {
 class MainWindow;
 }
@@ -36,6 +37,8 @@ private:
     void dataReceived(QPair<QLowEnergyCharacteristic, QByteArray> data);
     //motion_service motion_ser;
     thingy_manager thing_manager;
+    plotthread *plot_t;
+    QThread *thread;
 };
 
 #endif // MAINWINDOW_H
