@@ -55,4 +55,36 @@ void environment_service::read_handler(QLowEnergyCharacteristic ch, QByteArray b
 
          printf("%d \n",*humidity);
     }
+    else if(ch.uuid()==
+            QBluetoothUuid(QString(Env_Air_Charat_UUID))
+    )
+    {
+          QByteArray  temp_bytes = bytes;
+          uint16_t *eCO2, *TVOC;
+          float p=0.0;
+          uint8_t tmp_buf[4];
+          for(unsigned int i=0;i<4;i++){
+            tmp_buf[i] = temp_bytes[i];
+          }
+            eCO2 = (uint16_t*)&tmp_buf[0];
+            TVOC = (uint16_t*)&tmp_buf[2];
+         printf("%d \n",*eCO2, *TVOC);
+    }
+    else if(ch.uuid()==
+            QBluetoothUuid(QString(Env_Color_UUID))
+    )
+    {
+          QByteArray  temp_bytes = bytes;
+          uint16_t* red, *ble, *green, *clear;
+
+          uint8_t tmp_buf[8];
+          for(unsigned int i=0;i<8;i++){
+            tmp_buf[i] = temp_bytes[i];
+          }
+            red = (uint16_t*)&tmp_buf[0];
+            green = (uint16_t*)&tmp_buf[2];
+            ble = (uint16_t*)&tmp_buf[4];
+            clear = (uint16_t*)&tmp_buf[6];
+         printf("%d, %d, %d, %d\n",*red, *green,*ble,*clear);
+    }
 }

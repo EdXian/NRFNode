@@ -55,6 +55,9 @@ public:
     {
 
     }
+    virtual void readChanged_hadler(){
+
+    }
     virtual void read_handler(){
 
     }
