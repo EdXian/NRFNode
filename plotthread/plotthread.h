@@ -22,6 +22,7 @@ class plotthread : public QObject
 
 
      void update_plot();
+
  public :
      void onAccDataReceieved(Points3D data);
 

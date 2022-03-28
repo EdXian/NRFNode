@@ -38,12 +38,17 @@ MainWindow::MainWindow(QWidget *parent) :
         this->statusBar()->showMessage(info);
     });
 
+
+    saveFileEnable = false;
+    saveFilePath = QString(QCoreApplication::applicationDirPath()); //get the current path
+    qDebug()<<saveFilePath ;
     m_bleInterface->scanDevices();
     thing_manager= new thingy_manager(0);
     plot_t = new plotthread();
     thread = new QThread();
     plot_t->moveToThread(thread);
-    //
+    thread->start();
+
     plot_t->setPlotter(ui->plotwidget);
     plot_t->configPlotter();
 
@@ -58,6 +63,20 @@ MainWindow::MainWindow(QWidget *parent) :
 }
 void MainWindow::onrecv(Points3D data){
     plot_t->onAccDataReceieved(data);
+
+    QString line;
+    line = QString("%1, %2, %3\n").arg(data.x, 0, 'f', 2 ).arg(data.y, 0, 'f', 2 ).arg(data.z, 0, 'f', 2 );
+    //qDebug()<<line;
+    if(saveFileEnable){
+        if(outFile!=nullptr){
+            if (outFile->isOpen())
+            {
+                 outFile->write(line.toStdString().c_str());
+            }
+        }
+    }
+
+
 }
 MainWindow::~MainWindow()
 {
@@ -84,6 +103,7 @@ void MainWindow::on_sendButton_clicked()
 void MainWindow::dataReceived(QPair<QLowEnergyCharacteristic, QByteArray> data){
 
     thing_manager->handle(data);
+
    // plot_t->update_plot();
 }
 
@@ -94,5 +114,29 @@ void MainWindow::on_servicesComboBox_currentIndexChanged(int index)
 
 void MainWindow::on_list_ch_Button_clicked()
 {
+
+}
+
+void MainWindow::on_record_pushButton_clicked()
+{
+   saveFileEnable = true;
+   if(saveFileEnable){
+     outFile = new QFile("record.txt");
+     if (outFile->open(QIODevice::WriteOnly))
+     {
+
+
+
+
+     }
+
+   }
+}
+
+
+
+void MainWindow::on_recordSetButton_clicked()
+{
+    saveFilePath = QFileDialog::getExistingDirectory();
 
 }

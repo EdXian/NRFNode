@@ -98,14 +98,14 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QPushButton" name="record_pushButton">
         <property name="text">
          <string>record</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="toolButton">
+       <widget class="QToolButton" name="recordSetButton">
         <property name="text">
          <string>...</string>
         </property>

@@ -51,10 +51,13 @@ void plotthread::update_plot(){
 void plotthread::onAccDataReceieved(Points3D data){
 
    //printf("recv\n");
+
    Plot->graph(0)->addData(count, data.x);
    Plot->graph(1)->addData(count, data.y);
    Plot->graph(2)->addData(count, data.z);
    count++;
    this->resizeRange();
    Plot->replot();
+
+
 }

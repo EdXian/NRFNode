@@ -4,9 +4,17 @@
 #include <QMainWindow>
 #include "bleinterface.h"
 
+//bluetooth
 #include "bleservices/motion_service.h"
 #include "bleservices/thingy_manager.h"
+
+//plotter
 #include "plotthread/plotthread.h"
+
+//filesystem
+#include <iostream>
+#include <qfile.h>
+#include <qtextstream.h>
 
 namespace Ui {
 class MainWindow;
@@ -31,6 +39,10 @@ private slots:
 
     void on_list_ch_Button_clicked();
     void onrecv(Points3D data);
+    void on_record_pushButton_clicked();
+
+    void on_recordSetButton_clicked();
+
 private:
     uint32_t count;
     Ui::MainWindow *ui;
@@ -40,6 +52,11 @@ private:
     thingy_manager* thing_manager;
     plotthread *plot_t;
     QThread *thread;
+
+    QFile* outFile;
+    QString saveFilePath;
+    bool saveFileEnable;
+
 };
 
 #endif // MAINWINDOW_H
