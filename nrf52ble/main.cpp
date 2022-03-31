@@ -36,9 +36,9 @@
  * OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**@example examples/heart_rate_collector
+/**@example examples/blinky_client
  *
- * @brief Heart Rate Collector Sample Application main file.
+ * @brief Blinky client Application main file.
  *
  * This file contains the source code for a sample application that acts as a BLE Central device.
  * This application scans for a Heart Rate Sensor device and reads it's heart rate data.
@@ -62,12 +62,12 @@
 #include <stdio.h>
 #include <string.h>
 
-#define NRF_SD_BLE_API 5
+
 /** Definitions */
 #define DEFAULT_BAUD_RATE 1000000 /**< The baud rate to be used for serial communication with nRF5 device. */
 
 #ifdef _WIN32
-#define DEFAULT_UART_PORT_NAME "COM23"
+#define DEFAULT_UART_PORT_NAME "COM1"
 #endif
 #ifdef __APPLE__
 #define DEFAULT_UART_PORT_NAME "/dev/tty.usbmodem00000"
@@ -94,32 +94,19 @@ enum
 #define SLAVE_LATENCY                   0                                /**< Slave Latency in number of connection events. */
 #define CONNECTION_SUPERVISION_TIMEOUT  MSEC_TO_UNITS(4000, UNIT_10_MS)  /**< Determines supervision time-out in units of 10 milliseconds. */
 
-#define TARGET_DEV_NAME "Thingy" /**< Connect to a peripheral using a given advertising name here. */
-#define MAX_PEER_COUNT 1            /**< Maximum number of peer's application intends to manage. */
-
-#define BLE_UUID_HEART_RATE_SERVICE          0x180D /**< Heart Rate service UUID. */
-#define BLE_UUID_HEART_RATE_MEASUREMENT_CHAR 0x2A37 /**< Heart Rate Measurement characteristic UUID. */
-//#define BLE_UUID_CCCD                        0x2902
-//#define BLE_CCCD_NOTIFY                      0x01
-
-#define STRING_BUFFER_SIZE 50
+#define TARGET_DEV_NAME                 "Thingy"                  /**< Connect to a peripheral using a given advertising name here. */
+#define MAX_PEER_COUNT                  1                                /**< Maximum number of peer's application intends to manage. */
 
 
-//6E400001-B5A3-F393-E0A9-E50E24DCCA9E
+#define LBS_UUID_BASE   {{0x42, 0x00, 0x74, 0xA9, 0xFF, 0x52, 0x10, 0x9B, 0x33, 0x49, 0x35, 0x9B, 0x00, 0x00, 0x68, 0xEF}}
+#define LBS_UUID_SERVICE     0x0200
+#define LBS_UUID_BUTTON_CHAR 0x0201
+#define LBS_UUID_LED_CHAR    0x0202
 
-
-
-//EF68xxxx-9B35-4933-9B10-52FFA9740042
-#define BLE_UUID_NUS_SERVICE           0x0400               /**< The UUID of the Nordic UART Service. */
-#define BLE_UUID_NUS_RX_CHARACTERISTIC 0x0406               /**< The UUID of the RX Characteristic. */
-#define BLE_UUID_NUS_TX_CHARACTERISTIC 0x0003               /**< The UUID of the TX Characteristic. */
-
-#define NUS_BASE_UUID     {{0x42, 0x00, 0x74, 0xA9, 0xFF, 0x52, 0x10, 0x9B, 0x33, 0x49, 0x35, 0x9B, 0x00, 0x00, 0x68, 0xEF}}
-#define BLE_UUID_CCCD                        0x0001
-#define BLE_UUID_CHARACTERISTIC              0x2803
+#define BLE_UUID_CCCD                        0x2902
 #define BLE_CCCD_NOTIFY                      0x01
 
-
+#define STRING_BUFFER_SIZE 50
 
 typedef struct
 {
@@ -133,8 +120,9 @@ static uint8_t     m_connected_devices          = 0;
 static uint16_t    m_connection_handle          = 0;
 static uint16_t    m_service_start_handle       = 0;
 static uint16_t    m_service_end_handle         = 0;
-static uint16_t    m_hrm_char_handle            = 0;
-static uint16_t    m_hrm_cccd_handle            = 0;
+static uint16_t    m_button_state_char_handle   = 0;
+static uint16_t    m_button_state_cccd_handle   = 0;
+static uint16_t    m_led_state_value_handle     = 0;
 static bool        m_connection_is_in_progress  = false;
 static adapter_t * m_adapter                    = NULL;
 
@@ -514,21 +502,18 @@ static uint32_t service_discovery_start()
     uint32_t   err_code;
     uint16_t   start_handle = 0x01;
     ble_uuid_t srvc_uuid;
+    ble_uuid128_t base_uuid = LBS_UUID_BASE;
 
-
-    ble_uuid128_t base_uuid = NUS_BASE_UUID;
-    //sd_ble_version_get
     err_code = sd_ble_uuid_vs_add(m_adapter, &base_uuid, &srvc_uuid.type);
+    if (err_code != NRF_SUCCESS)
+    {
+        printf("Failed to set base uuid.\n");
+        fflush(stdout);
+    }
 
-    srvc_uuid.uuid = BLE_UUID_NUS_SERVICE;
+    srvc_uuid.uuid = LBS_UUID_SERVICE;
 
-    printf("Discovering primary services\n");
-    fflush(stdout);
-
-    srvc_uuid.type = //BLE_UUID_TYPE_BLE;
-    srvc_uuid.uuid = //BLE_UUID_HEART_RATE_SERVICE;
-
-    // Initiate procedure to find the primary BLE_UUID_HEART_RATE_SERVICE.
+    // Initiate procedure to find the primary LBS_UUID_SERVICE.
     err_code = sd_ble_gattc_primary_services_discover(m_adapter,
                                                       m_connection_handle, start_handle,
                                                       &srvc_uuid);
@@ -551,8 +536,7 @@ static uint32_t char_discovery_start()
 {
     ble_gattc_handle_range_t handle_range;
 
-    printf("Discovering characteristics\n");
-    fflush(stdout);
+    m_service_start_handle++;
 
     handle_range.start_handle = m_service_start_handle;
     handle_range.end_handle = m_service_end_handle;
@@ -562,7 +546,7 @@ static uint32_t char_discovery_start()
 
 /**@brief Function called upon discovering service's characteristics.
  *
- * @details Initiates heart rate monitor (m_hrm_char_handle) characteristic's descriptor discovery.
+ * @details Initiates Button state (m_button_state_char_handle) characteristic's descriptor discovery.
  *
  * @return NRF_SUCCESS on success, otherwise an error code.
  */
@@ -570,45 +554,69 @@ static uint32_t descr_discovery_start()
 {
     ble_gattc_handle_range_t handle_range;
 
-    printf("Discovering characteristic's descriptors\n");
-    fflush(stdout);
 
-    if (m_hrm_char_handle == 0)
+    if (m_button_state_char_handle == 0)
     {
-        printf("No heart rate measurement characteristic handle found\n");
+        printf("No button state characteristic handle found\n");
         fflush(stdout);
         return NRF_ERROR_INVALID_STATE;
     }
 
-    handle_range.start_handle   = m_hrm_char_handle;
+    m_service_start_handle++;
+
+    handle_range.start_handle   = m_service_start_handle;
     handle_range.end_handle     = m_service_end_handle;
 
     return sd_ble_gattc_descriptors_discover(m_adapter, m_connection_handle, &handle_range);
 }
 
-/**@brief Function that write's the HRM characteristic's CCCD.
+/**@brief Function that write's the Button state characteristic's CCCD.
  * *
  * @return NRF_SUCCESS on success, otherwise an error code.
  */
-static uint32_t hrm_cccd_set(uint8_t value)
+static uint32_t button_state_cccd_set(uint8_t value)
 {
     ble_gattc_write_params_t write_params;
     uint8_t                  cccd_value[2] = {value, 0};
 
-    printf("Setting HRM CCCD\n");
-    fflush(stdout);
-
-    if (m_hrm_cccd_handle == 0)
+    if (m_button_state_cccd_handle == 0)
     {
         printf("Error. No CCCD handle has been found\n");
         fflush(stdout);
         return NRF_ERROR_INVALID_STATE;
     }
 
-    write_params.handle     = m_hrm_cccd_handle;
-    write_params.len        = 18;
+    write_params.handle     = m_button_state_cccd_handle;
+    write_params.len        = 2;
     write_params.p_value    = cccd_value;
     write_params.write_op   = BLE_GATT_OP_WRITE_REQ;
+    write_params.offset     = 0;
+
+    return sd_ble_gattc_write(m_adapter, m_connection_handle, &write_params);
+}
+
+
+/**@brief Function that write's the Button state characteristic's CCCD.
+ * *
+ * @return NRF_SUCCESS on success, otherwise an error code.
+ */
+static uint32_t led_state_set(uint8_t value)
+{
+    ble_gattc_write_params_t write_params;
+
+    if (m_led_state_value_handle == 0)
+    {
+        printf("Error. No LED state handle has been found\n");
+        fflush(stdout);
+        return NRF_ERROR_INVALID_STATE;
+    }
+    printf("Toggle LED");
+    fflush(stdout);
+
+    write_params.handle     = m_led_state_value_handle;
+    write_params.len        = sizeof(value);
+    write_params.p_value    = &value;
+    write_params.write_op   = BLE_GATT_OP_WRITE_CMD;
     write_params.offset     = 0;
 
     return sd_ble_gattc_write(m_adapter, m_connection_handle, &write_params);
@@ -746,20 +754,20 @@ static void on_service_discovery_response(const ble_gattc_evt_t * const p_ble_ga
         printf("Warning, discovered multiple primary services. Ignoring all but the first\n");
     }
 
-    service_index = 0; /* We expect to discover only the Heart Rate service as requested. */
+    service_index = 0; /* We expect to discover only the Nordic LED and Button Service as requested. */
     service = &(p_ble_gattc_evt->params.prim_srvc_disc_rsp.services[service_index]);
 
-//    if (service->uuid.uuid != BLE_UUID_HEART_RATE_SERVICE)
-//    {
-//        printf("Unknown service discovered with UUID: 0x%04X\n", service->uuid.uuid);
-//        fflush(stdout);
-//        return;
-//    }
+    if (service->uuid.uuid != LBS_UUID_SERVICE)
+    {
+        printf("Unknown service discovered with UUID: 0x%04X\n", service->uuid.uuid);
+        fflush(stdout);
+        return;
+    }
 
     m_service_start_handle  = service->handle_range.start_handle;
     m_service_end_handle    = service->handle_range.end_handle;
 
-    printf("Discovered heart rate service. UUID: 0x%04X, "
+    printf("Discovered Nordic LED and Button Service. UUID: 0x%04X, "
                    "start handle: 0x%04X, end handle: 0x%04X\n",
         service->uuid.uuid, m_service_start_handle, m_service_end_handle);
     fflush(stdout);
@@ -795,14 +803,19 @@ static void on_characteristic_discovery_response(const ble_gattc_evt_t * const p
         fflush(stdout);
 
         if (p_ble_gattc_evt->params.char_disc_rsp.chars[i].uuid.uuid ==
-            0x0401)
+            LBS_UUID_BUTTON_CHAR)
         {
-
-            m_hrm_char_handle = p_ble_gattc_evt->params.char_disc_rsp.chars[i].handle_decl;
+            m_button_state_char_handle = p_ble_gattc_evt->params.char_disc_rsp.chars[i].handle_decl;
+            descr_discovery_start();
+        }
+        if (p_ble_gattc_evt->params.char_disc_rsp.chars[i].uuid.uuid ==
+            LBS_UUID_LED_CHAR)
+        {
+            m_led_state_value_handle = p_ble_gattc_evt->params.char_disc_rsp.chars[i].handle_decl;
+            descr_discovery_start();
         }
     }
 
-    descr_discovery_start();
 }
 
 /**@brief Function called on BLE_GATTC_EVT_DESC_DISC_RSP event.
@@ -815,7 +828,13 @@ static void on_descriptor_discovery_response(const ble_gattc_evt_t * const p_ble
 {
     int count = p_ble_gattc_evt->params.desc_disc_rsp.count;
 
-    if (p_ble_gattc_evt->gatt_status != NRF_SUCCESS)
+    if (p_ble_gattc_evt->gatt_status == BLE_GATT_STATUS_ATTERR_ATTRIBUTE_NOT_FOUND)
+    {
+        printf("Descriptor discovery complete\n");
+        fflush(stdout);
+        return;
+    }
+    else if (p_ble_gattc_evt->gatt_status != NRF_SUCCESS)
     {
         printf("Descriptor discovery failed. Error code 0x%X\n", p_ble_gattc_evt->gatt_status);
         fflush(stdout);
@@ -832,14 +851,31 @@ static void on_descriptor_discovery_response(const ble_gattc_evt_t * const p_ble
                p_ble_gattc_evt->params.desc_disc_rsp.descs[i].uuid.uuid);
         fflush(stdout);
 
-        if (p_ble_gattc_evt->params.desc_disc_rsp.descs[i].uuid.uuid == 0x2803)
+        if (p_ble_gattc_evt->params.desc_disc_rsp.descs[i].uuid.uuid == BLE_UUID_CCCD)
         {
-            m_hrm_cccd_handle = p_ble_gattc_evt->params.desc_disc_rsp.descs[i].handle;
-            printf("%02x\n",m_hrm_cccd_handle);
-            printf("Press enter to toggle notifications on the HRM characteristic\n");
+            m_button_state_cccd_handle = p_ble_gattc_evt->params.desc_disc_rsp.descs[i].handle;
+            button_state_cccd_set(BLE_CCCD_NOTIFY);
+            printf("Button state notification enabled\n");
             fflush(stdout);
         }
+        else if (p_ble_gattc_evt->params.desc_disc_rsp.descs[i].uuid.uuid == LBS_UUID_BUTTON_CHAR)
+        {
+            m_button_state_char_handle = p_ble_gattc_evt->params.desc_disc_rsp.descs[i].handle;
+        }
+        else if (p_ble_gattc_evt->params.desc_disc_rsp.descs[i].uuid.uuid == LBS_UUID_LED_CHAR)
+        {
+            m_led_state_value_handle = p_ble_gattc_evt->params.desc_disc_rsp.descs[i].handle;
+            printf("Led value handle 0x%x\n", m_led_state_value_handle);
+            fflush(stdout);
+        }
+        else if (p_ble_gattc_evt->params.desc_disc_rsp.descs[i].uuid.uuid == 0x2803)
+        {
+            char_discovery_start();
+            return;
+        }
+
     }
+    descr_discovery_start();
 }
 
 /**@brief Function called on BLE_GATTC_EVT_WRITE_RSP event.
@@ -860,17 +896,16 @@ static void on_write_response(const ble_gattc_evt_t * const p_ble_gattc_evt)
 
 /**@brief Function called on BLE_GATTC_EVT_HVX event.
  *
- * @details Logs the received heart rate measurement.
+ * @details Logs the received button state.
  *
  * @param[in] p_ble_gattc_evt Handle Value Notification/Indication Event.
  */
 static void on_hvx(const ble_gattc_evt_t * const p_ble_gattc_evt)
 {
-    if (p_ble_gattc_evt->params.hvx.handle >= m_hrm_char_handle ||
-            p_ble_gattc_evt->params.hvx.handle <= m_hrm_cccd_handle) // Heart rate measurement.
+    if (p_ble_gattc_evt->params.hvx.handle >= m_button_state_char_handle ||
+            p_ble_gattc_evt->params.hvx.handle <= m_button_state_cccd_handle) // button state.
     {
-        // We know the heart rate reading is encoded as 2 bytes [flag, value].
-        printf("Received heart rate measurement: %d\n", p_ble_gattc_evt->params.hvx.data[1]);
+        printf("Received button state: %d\n", p_ble_gattc_evt->params.hvx.data[0]);
     }
     else // Unknown data.
     {
@@ -1001,6 +1036,14 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
             on_conn_params_update_request(&(p_ble_evt->evt.gap_evt));
             break;
 
+        case BLE_GAP_EVT_CONN_PARAM_UPDATE:
+            printf("--Connection paramaters updated--\n");
+            printf("Connection interval: %d ms\n", p_ble_evt->evt.gap_evt.params.conn_param_update.conn_params.max_conn_interval);
+            printf("Supervision timeout: %d s\n", p_ble_evt->evt.gap_evt.params.conn_param_update.conn_params.conn_sup_timeout / 100);
+            printf("Slave latency: %d\n", p_ble_evt->evt.gap_evt.params.conn_param_update.conn_params.slave_latency);
+            fflush(stdout);
+            break;
+
     #if NRF_SD_BLE_API >= 3
         case BLE_GATTS_EVT_EXCHANGE_MTU_REQUEST:
             on_exchange_mtu_request(&(p_ble_evt->evt.gatts_evt));
@@ -1012,8 +1055,8 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
     #endif
 
         default:
-            printf("Received an un-handled event with ID: %d\n", p_ble_evt->header.evt_id);
-            fflush(stdout);
+            /*printf("Received an un-handled event with ID: 0x%x\n", p_ble_evt->header.evt_id);
+            fflush(stdout);*/
             break;
     }
 }
@@ -1031,7 +1074,7 @@ int main(int argc, char * argv[])
     uint32_t error_code;
     char *   serial_port = DEFAULT_UART_PORT_NAME;
     uint32_t baud_rate = DEFAULT_BAUD_RATE;
-    uint8_t  cccd_value = 0;
+    uint8_t  led_state = 0;
 
     if (argc > 1)
     {
@@ -1101,8 +1144,13 @@ int main(int argc, char * argv[])
             return NRF_SUCCESS;
         }
 
-        // Toggle notifications on the HRM characteristic every time user input is received.
-        cccd_value ^= BLE_CCCD_NOTIFY;
-        hrm_cccd_set( 0x0001);
+        led_state ^= 0x01;
+        error_code = led_state_set(led_state);
+        if (error_code != NRF_SUCCESS)
+        {
+            printf("Failed to update LED state. Error 0x%x\n", error_code);
+            fflush(stdout);
+        }
     }
+
 }
