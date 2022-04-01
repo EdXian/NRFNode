@@ -99,8 +99,11 @@ enum
 
 
 #define LBS_UUID_BASE   {{0x42, 0x00, 0x74, 0xA9, 0xFF, 0x52, 0x10, 0x9B, 0x33, 0x49, 0x35, 0x9B, 0x00, 0x00, 0x68, 0xEF}}
-#define LBS_UUID_SERVICE     0x0200
-#define LBS_UUID_BUTTON_CHAR 0x0201
+
+
+
+#define ENV_UUID_SERVICVE     0x0400
+#define ENV_UUID_BARO_CHAR    0x0406
 #define LBS_UUID_LED_CHAR    0x0202
 
 #define BLE_UUID_CCCD                        0x2902
@@ -511,9 +514,9 @@ static uint32_t service_discovery_start()
         fflush(stdout);
     }
 
-    srvc_uuid.uuid = LBS_UUID_SERVICE;
+    srvc_uuid.uuid = ENV_UUID_SERVICVE;
 
-    // Initiate procedure to find the primary LBS_UUID_SERVICE.
+    // Initiate procedure to find the primary ENV_UUID_SERVICVE.
     err_code = sd_ble_gattc_primary_services_discover(m_adapter,
                                                       m_connection_handle, start_handle,
                                                       &srvc_uuid);
@@ -757,7 +760,7 @@ static void on_service_discovery_response(const ble_gattc_evt_t * const p_ble_ga
     service_index = 0; /* We expect to discover only the Nordic LED and Button Service as requested. */
     service = &(p_ble_gattc_evt->params.prim_srvc_disc_rsp.services[service_index]);
 
-    if (service->uuid.uuid != LBS_UUID_SERVICE)
+    if (service->uuid.uuid != ENV_UUID_SERVICVE)
     {
         printf("Unknown service discovered with UUID: 0x%04X\n", service->uuid.uuid);
         fflush(stdout);
@@ -803,17 +806,20 @@ static void on_characteristic_discovery_response(const ble_gattc_evt_t * const p
         fflush(stdout);
 
         if (p_ble_gattc_evt->params.char_disc_rsp.chars[i].uuid.uuid ==
-            LBS_UUID_BUTTON_CHAR)
+            ENV_UUID_BARO_CHAR)
         {
             m_button_state_char_handle = p_ble_gattc_evt->params.char_disc_rsp.chars[i].handle_decl;
             descr_discovery_start();
+        }else{
+            char_discovery_start();
         }
-        if (p_ble_gattc_evt->params.char_disc_rsp.chars[i].uuid.uuid ==
-            LBS_UUID_LED_CHAR)
-        {
-            m_led_state_value_handle = p_ble_gattc_evt->params.char_disc_rsp.chars[i].handle_decl;
-            descr_discovery_start();
-        }
+
+//        if (p_ble_gattc_evt->params.char_disc_rsp.chars[i].uuid.uuid ==
+//            LBS_UUID_LED_CHAR)
+//        {
+//            m_led_state_value_handle = p_ble_gattc_evt->params.char_disc_rsp.chars[i].handle_decl;
+//            descr_discovery_start();
+//        }
     }
 
 }
@@ -855,10 +861,10 @@ static void on_descriptor_discovery_response(const ble_gattc_evt_t * const p_ble
         {
             m_button_state_cccd_handle = p_ble_gattc_evt->params.desc_disc_rsp.descs[i].handle;
             button_state_cccd_set(BLE_CCCD_NOTIFY);
-            printf("Button state notification enabled\n");
+            printf("IMU sensor raw data notification enabled\n");
             fflush(stdout);
         }
-        else if (p_ble_gattc_evt->params.desc_disc_rsp.descs[i].uuid.uuid == LBS_UUID_BUTTON_CHAR)
+        else if (p_ble_gattc_evt->params.desc_disc_rsp.descs[i].uuid.uuid == ENV_UUID_BARO_CHAR)
         {
             m_button_state_char_handle = p_ble_gattc_evt->params.desc_disc_rsp.descs[i].handle;
         }
@@ -871,7 +877,7 @@ static void on_descriptor_discovery_response(const ble_gattc_evt_t * const p_ble
         else if (p_ble_gattc_evt->params.desc_disc_rsp.descs[i].uuid.uuid == 0x2803)
         {
             char_discovery_start();
-            return;
+            //return;
         }
 
     }
@@ -900,12 +906,27 @@ static void on_write_response(const ble_gattc_evt_t * const p_ble_gattc_evt)
  *
  * @param[in] p_ble_gattc_evt Handle Value Notification/Indication Event.
  */
+
 static void on_hvx(const ble_gattc_evt_t * const p_ble_gattc_evt)
 {
+    static uint16_t len;
+    static uint8_t data[18] = {0};
+    static int16_t *acc_x, *acc_y, *acc_z;
     if (p_ble_gattc_evt->params.hvx.handle >= m_button_state_char_handle ||
             p_ble_gattc_evt->params.hvx.handle <= m_button_state_cccd_handle) // button state.
     {
-        printf("Received button state: %d\n", p_ble_gattc_evt->params.hvx.data[0]);
+
+        len = p_ble_gattc_evt->params.hvx.len;
+
+
+        memcpy(data,&p_ble_gattc_evt->params.hvx.data[0],len);
+
+        acc_x = (int16_t*)&data[0];
+        acc_y = (int16_t*)&data[2];
+        acc_z = (int16_t*)&data[4];
+
+
+        printf("raw: %d %d %d\n", *acc_x,*acc_y,*acc_z);
     }
     else // Unknown data.
     {
@@ -1145,7 +1166,7 @@ int main(int argc, char * argv[])
         }
 
         led_state ^= 0x01;
-        error_code = led_state_set(led_state);
+        //error_code = led_state_set(led_state);
         if (error_code != NRF_SUCCESS)
         {
             printf("Failed to update LED state. Error 0x%x\n", error_code);
