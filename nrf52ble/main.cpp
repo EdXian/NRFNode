@@ -61,6 +61,18 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
+#include <sys/time.h>
+#include <chrono>
+#include <iostream>
+#include <sys/time.h>
+#include <ctime>
+
+using std::cout; using std::endl;
+using std::chrono::duration_cast;
+using std::chrono::milliseconds;
+using std::chrono::seconds;
+using std::chrono::system_clock;
 
 
 /** Definitions */
@@ -89,12 +101,12 @@ enum
 #define SCAN_WINDOW   0x0050 /**< Determines scan window in units of 0.625 milliseconds. */
 #define SCAN_TIMEOUT  0x0    /**< Scan timeout between 0x01 and 0xFFFF in seconds, 0x0 disables timeout. */
 
-#define MIN_CONNECTION_INTERVAL         MSEC_TO_UNITS(7.5, UNIT_1_25_MS) /**< Determines minimum connection interval in milliseconds. */
-#define MAX_CONNECTION_INTERVAL         MSEC_TO_UNITS(7.5, UNIT_1_25_MS) /**< Determines maximum connection interval in milliseconds. */
+#define MIN_CONNECTION_INTERVAL         MSEC_TO_UNITS(10, UNIT_1_25_MS) /**< Determines minimum connection interval in milliseconds. */
+#define MAX_CONNECTION_INTERVAL         MSEC_TO_UNITS(10, UNIT_1_25_MS) /**< Determines maximum connection interval in milliseconds. */
 #define SLAVE_LATENCY                   0                                /**< Slave Latency in number of connection events. */
 #define CONNECTION_SUPERVISION_TIMEOUT  MSEC_TO_UNITS(4000, UNIT_10_MS)  /**< Determines supervision time-out in units of 10 milliseconds. */
 
-#define TARGET_DEV_NAME                 "Thingy"                  /**< Connect to a peripheral using a given advertising name here. */
+#define TARGET_DEV_NAME                 "sensthin"                  /**< Connect to a peripheral using a given advertising name here. */
 #define MAX_PEER_COUNT                  1                                /**< Maximum number of peer's application intends to manage. */
 
 
@@ -104,7 +116,7 @@ enum
 
 #define ENV_UUID_SERVICVE     0x0400
 #define ENV_UUID_BARO_CHAR    0x0406
-#define LBS_UUID_LED_CHAR    0x0202
+#define LBS_UUID_LED_CHAR     0x0101
 
 #define BLE_UUID_CCCD                        0x2902
 #define BLE_CCCD_NOTIFY                      0x01
@@ -125,7 +137,7 @@ static uint16_t    m_service_start_handle       = 0;
 static uint16_t    m_service_end_handle         = 0;
 static uint16_t    m_button_state_char_handle   = 0;
 static uint16_t    m_button_state_cccd_handle   = 0;
-static uint16_t    m_led_state_value_handle     = 0;
+//static uint16_t    m_led_state_value_handle     = 0;
 static bool        m_connection_is_in_progress  = false;
 static adapter_t * m_adapter                    = NULL;
 
@@ -543,7 +555,7 @@ static uint32_t char_discovery_start()
 
     handle_range.start_handle = m_service_start_handle;
     handle_range.end_handle = m_service_end_handle;
-
+    printf("start %d end %d \n",m_service_start_handle,m_service_end_handle );
     return sd_ble_gattc_characteristics_discover(m_adapter, m_connection_handle, &handle_range);
 }
 
@@ -603,27 +615,27 @@ static uint32_t button_state_cccd_set(uint8_t value)
  * *
  * @return NRF_SUCCESS on success, otherwise an error code.
  */
-static uint32_t led_state_set(uint8_t value)
-{
-    ble_gattc_write_params_t write_params;
+//static uint32_t led_state_set(uint8_t value)
+//{
+//    ble_gattc_write_params_t write_params;
 
-    if (m_led_state_value_handle == 0)
-    {
-        printf("Error. No LED state handle has been found\n");
-        fflush(stdout);
-        return NRF_ERROR_INVALID_STATE;
-    }
-    printf("Toggle LED");
-    fflush(stdout);
+//    if (m_led_state_value_handle == 0)
+//    {
+//        printf("Error. No LED state handle has been found\n");
+//        fflush(stdout);
+//        return NRF_ERROR_INVALID_STATE;
+//    }
+//    printf("Toggle LED");
+//    fflush(stdout);
 
-    write_params.handle     = m_led_state_value_handle;
-    write_params.len        = sizeof(value);
-    write_params.p_value    = &value;
-    write_params.write_op   = BLE_GATT_OP_WRITE_CMD;
-    write_params.offset     = 0;
+//    write_params.handle     = m_led_state_value_handle;
+//    write_params.len        = sizeof(value);
+//    write_params.p_value    = &value;
+//    write_params.write_op   = BLE_GATT_OP_WRITE_CMD;
+//    write_params.offset     = 0;
 
-    return sd_ble_gattc_write(m_adapter, m_connection_handle, &write_params);
-}
+//    return sd_ble_gattc_write(m_adapter, m_connection_handle, &write_params);
+//}
 
 
 /** Event functions */
@@ -760,6 +772,14 @@ static void on_service_discovery_response(const ble_gattc_evt_t * const p_ble_ga
     service_index = 0; /* We expect to discover only the Nordic LED and Button Service as requested. */
     service = &(p_ble_gattc_evt->params.prim_srvc_disc_rsp.services[service_index]);
 
+//    uint8_t service_num = p_ble_gattc_evt->params.prim_srvc_disc_rsp.count;
+//    for(uint8_t i=0; i< service_num;i++){
+//        ble_gattc_service_t ble_gat;
+//        ble_gat =  p_ble_gattc_evt->params.prim_srvc_disc_rsp.services[i];
+//        printf("%d\n",ble_gat.uuid.uuid);
+//        fflush(stdout);
+//    }
+
     if (service->uuid.uuid != ENV_UUID_SERVICVE)
     {
         printf("Unknown service discovered with UUID: 0x%04X\n", service->uuid.uuid);
@@ -809,9 +829,11 @@ static void on_characteristic_discovery_response(const ble_gattc_evt_t * const p
             ENV_UUID_BARO_CHAR)
         {
             m_button_state_char_handle = p_ble_gattc_evt->params.char_disc_rsp.chars[i].handle_decl;
+            printf("here\n");
             descr_discovery_start();
         }else{
             char_discovery_start();
+            return;
         }
 
 //        if (p_ble_gattc_evt->params.char_disc_rsp.chars[i].uuid.uuid ==
@@ -821,6 +843,7 @@ static void on_characteristic_discovery_response(const ble_gattc_evt_t * const p
 //            descr_discovery_start();
 //        }
     }
+
 
 }
 
@@ -860,24 +883,23 @@ static void on_descriptor_discovery_response(const ble_gattc_evt_t * const p_ble
         if (p_ble_gattc_evt->params.desc_disc_rsp.descs[i].uuid.uuid == BLE_UUID_CCCD)
         {
             m_button_state_cccd_handle = p_ble_gattc_evt->params.desc_disc_rsp.descs[i].handle;
-            button_state_cccd_set(BLE_CCCD_NOTIFY);
-            printf("IMU sensor raw data notification enabled\n");
+            printf("notify found\n");
             fflush(stdout);
         }
         else if (p_ble_gattc_evt->params.desc_disc_rsp.descs[i].uuid.uuid == ENV_UUID_BARO_CHAR)
         {
             m_button_state_char_handle = p_ble_gattc_evt->params.desc_disc_rsp.descs[i].handle;
         }
-        else if (p_ble_gattc_evt->params.desc_disc_rsp.descs[i].uuid.uuid == LBS_UUID_LED_CHAR)
-        {
-            m_led_state_value_handle = p_ble_gattc_evt->params.desc_disc_rsp.descs[i].handle;
-            printf("Led value handle 0x%x\n", m_led_state_value_handle);
-            fflush(stdout);
-        }
+//        else if (p_ble_gattc_evt->params.desc_disc_rsp.descs[i].uuid.uuid == LBS_UUID_LED_CHAR)
+//        {
+//            m_led_state_value_handle = p_ble_gattc_evt->params.desc_disc_rsp.descs[i].handle;
+//            printf("Led value handle 0x%x\n", m_led_state_value_handle);
+//            fflush(stdout);
+//        }
         else if (p_ble_gattc_evt->params.desc_disc_rsp.descs[i].uuid.uuid == 0x2803)
         {
             char_discovery_start();
-            //return;
+            return;
         }
 
     }
@@ -912,6 +934,15 @@ static void on_hvx(const ble_gattc_evt_t * const p_ble_gattc_evt)
     static uint16_t len;
     static uint8_t data[18] = {0};
     static int16_t *acc_x, *acc_y, *acc_z;
+    //printf("ok\n");
+    struct timeval start, end;
+
+    long mtime, seconds, useconds;
+
+    auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+    //auto sec_since_epoch = duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
+
+
     if (p_ble_gattc_evt->params.hvx.handle >= m_button_state_char_handle ||
             p_ble_gattc_evt->params.hvx.handle <= m_button_state_cccd_handle) // button state.
     {
@@ -925,8 +956,9 @@ static void on_hvx(const ble_gattc_evt_t * const p_ble_gattc_evt)
         acc_y = (int16_t*)&data[2];
         acc_z = (int16_t*)&data[4];
 
-
-        printf("raw: %d %d %d\n", *acc_x,*acc_y,*acc_z);
+        //printf("Seconds since January 1, 1970 = %ld\n", seconds);
+        printf("( %ld ) raw: %d %d %d\n",millisec_since_epoch ,*acc_x,*acc_y,*acc_z);
+        fflush(stdout);
     }
     else // Unknown data.
     {
@@ -1167,6 +1199,8 @@ int main(int argc, char * argv[])
 
         led_state ^= 0x01;
         //error_code = led_state_set(led_state);
+        button_state_cccd_set(BLE_CCCD_NOTIFY);
+        printf("IMU sensor raw data notification enabled\n");
         if (error_code != NRF_SUCCESS)
         {
             printf("Failed to update LED state. Error 0x%x\n", error_code);
