@@ -57,7 +57,7 @@
 /** Includes */
 #include "ble.h"
 #include "sd_rpc.h"
-
+#include "ble_hci.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
@@ -1182,6 +1182,8 @@ int main(int argc, char * argv[])
         char c = (char)getchar();
         if (c == 'q' || c == 'Q')
         {
+
+            sd_ble_gap_disconnect(m_adapter,m_connection_handle,BLE_HCI_REMOTE_USER_TERMINATED_CONNECTION);
             error_code = sd_rpc_close(m_adapter);
 
             if (error_code != NRF_SUCCESS)
