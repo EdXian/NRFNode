@@ -106,7 +106,7 @@ enum
 #define SLAVE_LATENCY                   0                                /**< Slave Latency in number of connection events. */
 #define CONNECTION_SUPERVISION_TIMEOUT  MSEC_TO_UNITS(4000, UNIT_10_MS)  /**< Determines supervision time-out in units of 10 milliseconds. */
 
-#define TARGET_DEV_NAME                 "sensthin"                  /**< Connect to a peripheral using a given advertising name here. */
+#define TARGET_DEV_NAME                 "Thingy"                  /**< Connect to a peripheral using a given advertising name here. */
 #define MAX_PEER_COUNT                  1                                /**< Maximum number of peer's application intends to manage. */
 
 
@@ -942,7 +942,7 @@ static void on_hvx(const ble_gattc_evt_t * const p_ble_gattc_evt)
     auto millisec_since_epoch = duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
     //auto sec_since_epoch = duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
 
-
+    printf("ok\n");
     if (p_ble_gattc_evt->params.hvx.handle >= m_button_state_char_handle ||
             p_ble_gattc_evt->params.hvx.handle <= m_button_state_cccd_handle) // button state.
     {
