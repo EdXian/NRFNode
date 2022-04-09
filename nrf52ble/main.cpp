@@ -67,7 +67,7 @@
 #include <iostream>
 #include <sys/time.h>
 #include <ctime>
-
+#define NRF_SD_BLE_API 5
 using std::cout; using std::endl;
 using std::chrono::duration_cast;
 using std::chrono::milliseconds;
@@ -79,7 +79,7 @@ using std::chrono::system_clock;
 #define DEFAULT_BAUD_RATE 1000000 /**< The baud rate to be used for serial communication with nRF5 device. */
 
 #ifdef _WIN32
-#define DEFAULT_UART_PORT_NAME "COM1"
+#define DEFAULT_UART_PORT_NAME "COM23"
 #endif
 #ifdef __APPLE__
 #define DEFAULT_UART_PORT_NAME "/dev/tty.usbmodem00000"
@@ -106,7 +106,7 @@ enum
 #define SLAVE_LATENCY                   0                                /**< Slave Latency in number of connection events. */
 #define CONNECTION_SUPERVISION_TIMEOUT  MSEC_TO_UNITS(4000, UNIT_10_MS)  /**< Determines supervision time-out in units of 10 milliseconds. */
 
-#define TARGET_DEV_NAME                 "Thingy"                  /**< Connect to a peripheral using a given advertising name here. */
+#define TARGET_DEV_NAME                 "mything"                  /**< Connect to a peripheral using a given advertising name here. */
 #define MAX_PEER_COUNT                  1                                /**< Maximum number of peer's application intends to manage. */
 
 
