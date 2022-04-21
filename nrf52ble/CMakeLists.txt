@@ -11,7 +11,11 @@ set(CMAKE_CXX_STANDARD 11)
 
 
 
-add_executable(nrf52ble main.cpp)
+set(TCP_SOCKET_FILE ${CMAKE_CURRENT_SOURCE_DIR}/tcpsocket/tcpsocket.c )
+
+
+
+add_executable(nrf52ble main.cpp ${TCP_SOCKET_FILE})
 message(STATUS ${CMAKE_C_COMPILER})
 message(STATUS ${CMAKE_CXX_COMPILER})
 target_compile_definitions(
@@ -61,6 +65,7 @@ if (UNIX)
 
     target_include_directories(
             nrf52ble PUBLIC
+            ${CMAKE_CURRENT_SOURCE_DIR}/tcpsocket
             ${CMAKE_CURRENT_SOURCE_DIR}/libble/nrf-ble-driver-4.1.4-linux_x86_64/include/sd_api_v5
     )
     link_directories(

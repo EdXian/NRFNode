@@ -67,6 +67,17 @@
 #include <iostream>
 #include <sys/time.h>
 #include <ctime>
+
+#include "tcpsocket.h"
+
+int listenfd = 0, connfd = 0;
+struct sockaddr_in serv_addr;
+
+char sendBuff[1025];
+time_t ticks;
+
+
+
 #define NRF_SD_BLE_API 5
 using std::cout; using std::endl;
 using std::chrono::duration_cast;
@@ -955,9 +966,9 @@ static void on_hvx(const ble_gattc_evt_t * const p_ble_gattc_evt)
         acc_x = (int16_t*)&data[0];
         acc_y = (int16_t*)&data[2];
         acc_z = (int16_t*)&data[4];
-
+        tcpscoket_send(data,len);
         //printf("Seconds since January 1, 1970 = %ld\n", seconds);
-        printf("( %ld ) raw: %d %d %d\n",millisec_since_epoch ,*acc_x,*acc_y,*acc_z);
+        printf("( %ld ) raw: %d %d %d, %d\n",millisec_since_epoch ,*acc_x,*acc_y,*acc_z, len);
         fflush(stdout);
     }
     else // Unknown data.
@@ -1115,19 +1126,18 @@ static void ble_evt_dispatch(adapter_t * adapter, ble_evt_t * p_ble_evt)
 }
 
 
-/** Main */
 
-/**@brief Function for application main entry.
- *
- * @param[in] argc Number of arguments (program expects 0 or 1 arguments).
- * @param[in] argv The serial port of the target nRF5 device (Optional).
- */
+
+
 int main(int argc, char * argv[])
 {
     uint32_t error_code;
     char *   serial_port = DEFAULT_UART_PORT_NAME;
     uint32_t baud_rate = DEFAULT_BAUD_RATE;
     uint8_t  led_state = 0;
+
+
+    tcpsocket_init();
 
     if (argc > 1)
     {
@@ -1149,9 +1159,8 @@ int main(int argc, char * argv[])
         return error_code;
     }
 
-#if NRF_SD_BLE_API >= 5
+
     ble_cfg_set(m_config_id);
-#endif
 
     error_code = ble_stack_init();
 
@@ -1159,15 +1168,6 @@ int main(int argc, char * argv[])
     {
         return error_code;
     }
-
-#if NRF_SD_BLE_API < 5
-    error_code = ble_options_set();
-
-    if (error_code != NRF_SUCCESS)
-    {
-        return error_code;
-    }
-#endif
 
     error_code = scan_start();
 
@@ -1179,6 +1179,10 @@ int main(int argc, char * argv[])
     // Endlessly loop.
     for (;;)
     {
+//        while(1){
+//            tcpsocket_handle();
+//        }
+
         char c = (char)getchar();
         if (c == 'q' || c == 'Q')
         {
@@ -1208,6 +1212,14 @@ int main(int argc, char * argv[])
             printf("Failed to update LED state. Error 0x%x\n", error_code);
             fflush(stdout);
         }
+
+
+
+
+
+
+
+
     }
 
 }
