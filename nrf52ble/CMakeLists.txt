@@ -11,7 +11,11 @@ set(CMAKE_CXX_STANDARD 11)
 
 
 
-add_executable(nrf52ble main.cpp)
+set(TCP_SOCKET_FILE ${CMAKE_CURRENT_SOURCE_DIR}/tcpsocket/tcpsocket.c )
+
+
+
+add_executable(nrf52ble main.cpp ${TCP_SOCKET_FILE})
 message(STATUS ${CMAKE_C_COMPILER})
 message(STATUS ${CMAKE_CXX_COMPILER})
 target_compile_definitions(
@@ -32,6 +36,7 @@ set(DEFINES "-DUNICODE -D_UNICODE -DWIN32 -DMINGW_HAS_SECURE_API=1")
 message(STATUS ${CMAKE_EXE_LINKER_FLAGS})
     target_include_directories(
             nrf52ble PUBLIC
+            ${CMAKE_CURRENT_SOURCE_DIR}/tcpsocket
             ${CMAKE_CURRENT_SOURCE_DIR}/libble/nrf-ble-driver-4.1.4-win_x86_64/include/sd_api_v5
     )
 
@@ -51,7 +56,7 @@ target_link_libraries(
 
     ${CMAKE_CURRENT_SOURCE_DIR}/libble/nrf-ble-driver-4.1.4-win_x86_64/lib/fmt.dll
     ${CMAKE_CURRENT_SOURCE_DIR}/libble/nrf-ble-driver-4.1.4-win_x86_64/lib/nrf-ble-driver-sd_api_v5-mt-4_1_4.dll
-
+   wsock32 ws2_32
     )
 
 endif (WIN32)
@@ -61,6 +66,7 @@ if (UNIX)
 
     target_include_directories(
             nrf52ble PUBLIC
+            ${CMAKE_CURRENT_SOURCE_DIR}/tcpsocket
             ${CMAKE_CURRENT_SOURCE_DIR}/libble/nrf-ble-driver-4.1.4-linux_x86_64/include/sd_api_v5
     )
     link_directories(
