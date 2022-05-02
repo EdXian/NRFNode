@@ -1,0 +1,2 @@
+Output/Release/Obj/usbd_ble_uart_freertos_pca10056_s140/thumb_crt0.o: \
+ D:/EmbeddedStudio_ARM_Nordic_v568_win_x64/arm_segger_embedded_studio_v568_win_x64_nordic/source/thumb_crt0.s

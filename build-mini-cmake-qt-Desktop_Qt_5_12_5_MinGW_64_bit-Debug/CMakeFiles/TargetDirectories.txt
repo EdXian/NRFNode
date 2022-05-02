@@ -1,4 +1,0 @@
-C:/Users/Ed/Desktop/Qt_thingy52/build-mini-cmake-qt-Desktop_Qt_5_12_5_MinGW_64_bit-Debug/CMakeFiles/example.dir
-C:/Users/Ed/Desktop/Qt_thingy52/build-mini-cmake-qt-Desktop_Qt_5_12_5_MinGW_64_bit-Debug/CMakeFiles/edit_cache.dir
-C:/Users/Ed/Desktop/Qt_thingy52/build-mini-cmake-qt-Desktop_Qt_5_12_5_MinGW_64_bit-Debug/CMakeFiles/rebuild_cache.dir
-C:/Users/Ed/Desktop/Qt_thingy52/build-mini-cmake-qt-Desktop_Qt_5_12_5_MinGW_64_bit-Debug/CMakeFiles/example_autogen.dir

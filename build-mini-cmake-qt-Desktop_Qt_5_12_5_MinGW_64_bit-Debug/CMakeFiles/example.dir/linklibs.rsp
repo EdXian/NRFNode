@@ -1,1 +1,0 @@
- D:/Qt5/5.12.5/mingw73_64/lib/libQt5PrintSupportd.a D:/Qt5/5.12.5/mingw73_64/lib/libQt5Widgetsd.a D:/Qt5/5.12.5/mingw73_64/lib/libQt5Guid.a D:/Qt5/5.12.5/mingw73_64/lib/libQt5Cored.a D:/Qt5/5.12.5/mingw73_64/lib/libqtmaind.a -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 
