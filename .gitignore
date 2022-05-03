@@ -1,1 +1,5 @@
 build
+build*/
+nrf52ble/CMakeLists.txt.user
+nrf52ble/CMakeLists.txt.user.*
+Output/
