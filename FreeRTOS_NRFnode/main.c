@@ -66,6 +66,8 @@
 #include "app_uart.h"
 #include "app_util_platform.h"
 #include "bsp_btn_ble.h"
+#include "nrf_ble_qwr.h"
+
 
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
@@ -89,7 +91,9 @@
 #include "FreeRTOS.h"
 #include "task.h"
 #include "semphr.h"
+#include "nrf_drv_power.h"
 
+#include "motion_service.h"
 /**
  * The size of the stack for the Logger task (in 32-bit words).
  * Logger uses sprintf internally so it is a rather stack hungry process.
@@ -166,12 +170,15 @@ APP_USBD_CDC_ACM_GLOBAL_DEF(m_app_cdc_acm,
 
 // USB DEFINES END
 
+NRF_BLE_QWR_DEF(m_qwr);             /**< Context for the Queued Write module.*/
+BLE_BMWSEART_DEF(m_bmwseat);
+
 // BLE DEFINES START
 #define APP_BLE_CONN_CFG_TAG            1                                           /**< A tag identifying the SoftDevice BLE configuration. */
 
 #define APP_FEATURE_NOT_SUPPORTED       BLE_GATT_STATUS_ATTERR_APP_BEGIN + 2        /**< Reply when unsupported features are requested. */
 
-#define DEVICE_NAME                     "Nordic_USBD_BLE_UART"                      /**< Name of device. Will be included in the advertising data. */
+#define DEVICE_NAME                     "NRFNode"                      /**< Name of device. Will be included in the advertising data. */
 #define NUS_SERVICE_UUID_TYPE           BLE_UUID_TYPE_VENDOR_BEGIN                  /**< UUID type for the Nordic UART Service (vendor specific). */
 
 #define APP_BLE_OBSERVER_PRIO           3                                           /**< Application's BLE observer priority. You shouldn't need to modify this value. */
@@ -305,19 +312,54 @@ static void nus_data_handler(ble_nus_evt_t * p_evt)
 
 }
 
+static void nrf_qwr_error_handler(uint32_t nrf_error) {
+    APP_ERROR_HANDLER(nrf_error);
+}
+uint8_t bmw_notify_enble = false;
+static void bmwseat_evt_handler(ble_bmwseat_service_t *p_bmwseat_service,
+                                 ble_bmwseat_evt_t *p_evt) {
+    // Action to perform when the Data I/O characteristic notifications are
+    // enabled Add your implementation here
+    if (p_evt->evt_type == BLE_BMW_INFO_EVT_NOTIFICATION_ENABLED) {
+        // Possibly save to a global variable to know that notifications are
+        // ENABLED
+        bmw_notify_enble = true;
+        NRF_LOG_INFO("Notifications ENABLED on BMW INFO Characteristic");
+    } else if (p_evt->evt_type == BLE_BMW_INFO_EVT_NOTIFICATION_DISABLED) {
+        // Possibly save to a global variable to know that notifications are
+        // DISABLED
+        NRF_LOG_INFO("Notifications DISABLED on BMW INFO Characteristic");
+    }
+}
 
-/** @brief Function for initializing services that will be used by the application. */
+
 static void services_init(void)
 {
-    uint32_t       err_code;
-    ble_nus_init_t nus_init;
+    //uint32_t       err_code;
+    //ble_nus_init_t nus_init;
 
-    memset(&nus_init, 0, sizeof(nus_init));
+    //memset(&nus_init, 0, sizeof(nus_init));
 
-    nus_init.data_handler = nus_data_handler;
+    //nus_init.data_handler = nus_data_handler;
 
-    err_code = ble_nus_init(&m_nus, &nus_init);
-    APP_ERROR_CHECK(err_code);
+    //err_code = ble_nus_init(&m_nus, &nus_init);
+    //APP_ERROR_CHECK(err_code);
+      ret_code_t err_code;
+  nrf_ble_qwr_init_t qwr_init = {0};
+  
+  qwr_init.error_handler = nrf_qwr_error_handler;
+  err_code = nrf_ble_qwr_init(&m_qwr, &qwr_init);
+  APP_ERROR_CHECK(err_code);
+
+  // Initialize the BMW seat service
+  ble_bmwseat_service_init_t bmwseat_init;
+  memset(&bmwseat_init, 0, sizeof(bmwseat_init));
+  bmwseat_init.evt_handler = bmwseat_evt_handler;
+  err_code = ble_bmwseat_service_init(&m_bmwseat, &bmwseat_init);
+
+  APP_ERROR_CHECK(err_code);
+
+  NRF_LOG_INFO("Done with services_init()");
 }
 
 /**
@@ -911,6 +953,19 @@ void vApplicationIdleHook( void )
      vTaskResume(m_logger_thread);
 #endif
 }
+static void power_manage(void)
+{
+    uint32_t err_code = sd_app_evt_wait();
+    APP_ERROR_CHECK(err_code);
+}
+
+static void idle_state_handle(void)
+{
+    UNUSED_RETURN_VALUE(NRF_LOG_PROCESS());
+    power_manage();
+}
+
+
 
 
 /** @brief Application main function. */
@@ -930,29 +985,29 @@ int main(void)
     ret = nrf_drv_clock_init();
     APP_ERROR_CHECK(ret);
 
-#if NRF_LOG_ENABLED
-    // Start execution.
-    if (pdPASS != xTaskCreate(logger_thread,
-                              "LOGGER",
-                              LOGGER_STACK_SIZE,
-                              NULL,
-                              LOGGER_PRIORITY,
-                              &m_logger_thread))
-    {
-        APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
-    }
-#endif
+//#if NRF_LOG_ENABLED
+//    // Start execution.
+//    if (pdPASS != xTaskCreate(logger_thread,
+//                              "LOGGER",
+//                              LOGGER_STACK_SIZE,
+//                              NULL,
+//                              LOGGER_PRIORITY,
+//                              &m_logger_thread))
+//    {
+//        APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
+//    }
+//#endif
 
-    if (pdPASS != xTaskCreate(usbd_thread,
-                              "USBD",
-                              USBD_STACK_SIZE,
-                              NULL,
-                              USBD_PRIORITY,
-                              &m_usbd_thread))
-    {
-        APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
-    }
-    NRF_LOG_INFO("USBD BLE UART example started.");
+//    if (pdPASS != xTaskCreate(usbd_thread,
+//                              "USBD",
+//                              USBD_STACK_SIZE,
+//                              NULL,
+//                              USBD_PRIORITY,
+//                              &m_usbd_thread))
+//    {
+//        APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
+//    }
+//    NRF_LOG_INFO("USBD BLE UART example started.");
 
 
     ble_stack_init();
@@ -961,7 +1016,7 @@ int main(void)
     services_init();
     advertising_init();
     conn_params_init();
-
+    //advertising_start(NULL);
     // Create a FreeRTOS task for the BLE stack.
     // The task will run advertising_start() before entering its loop.
     nrf_sdh_freertos_init(advertising_start, NULL);
@@ -973,7 +1028,8 @@ int main(void)
 
     for (;;)
     {
-       APP_ERROR_HANDLER(NRF_ERROR_FORBIDDEN);
+     idle_state_handle();
+      // APP_ERROR_HANDLER(NRF_ERROR_FORBIDDEN);
     }
 }
 
