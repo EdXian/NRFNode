@@ -965,7 +965,27 @@ static void idle_state_handle(void)
     power_manage();
 }
 
+float vec[3];
 
+
+
+
+void notify_thread(void *p){
+
+  float count =0 ;
+  for(;;){
+   
+    vec[0] = sin(2*3.14159/0.3*count);
+    vec[1] = cos(2*3.14159/0.7*count) + sin(2*3.14159/0.3*count);
+    vec[2] =  cos(2*3.14159/0.7*count);
+
+    //ble_motion_gravity_notify(&m_bmwseat,(uint8_t*)vec, sizeof(vec));
+    ble_motion_raw_notify(&m_bmwseat,(uint8_t*)vec, sizeof(vec));
+    
+     count++;
+    vTaskDelay(100);
+  }
+}
 
 
 /** @brief Application main function. */
@@ -998,17 +1018,30 @@ int main(void)
 //    }
 //#endif
 
-//    if (pdPASS != xTaskCreate(usbd_thread,
-//                              "USBD",
-//                              USBD_STACK_SIZE,
-//                              NULL,
-//                              USBD_PRIORITY,
-//                              &m_usbd_thread))
-//    {
-//        APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
-//    }
-//    NRF_LOG_INFO("USBD BLE UART example started.");
 
+ if (pdPASS != xTaskCreate(usbd_thread,
+                            "usbd",
+                            USBD_STACK_SIZE,
+                              NULL,
+                              USBD_PRIORITY,
+                              &m_usbd_thread))
+    {
+        APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
+    }
+    NRF_LOG_INFO("USBD BLE UART example started.");
+
+
+
+ if (pdPASS != xTaskCreate(notify_thread,
+                            "notify",
+                            USBD_STACK_SIZE,
+                              NULL,
+                              USBD_PRIORITY-1,
+                              NULL))
+    {
+        APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
+    }
+    NRF_LOG_INFO("USBD BLE UART example started.");
 
     ble_stack_init();
     gap_params_init();

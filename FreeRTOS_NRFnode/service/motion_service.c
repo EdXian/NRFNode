@@ -22,7 +22,7 @@
 //#include "boot_pin.h"
 //#include "boot.h"
 #include "nrf_delay.h"
-uint8_t bmw_status[VALUE_LEN_STATUS] = {BMW_SEAT_VERSION, 0, 0, 0, 0, 0 ,0 ,0};
+uint8_t bmw_status[VALUE_LEN_STATUS] = {BMW_SEAT_VERSION, 1, 2, 3, 4, 5 ,6 ,7};
 
 /* Global value in stack for characteristic */
 
@@ -118,6 +118,64 @@ void ble_bmwseat_service_on_ble_evt(ble_evt_t const *p_ble_evt, void *p_context)
   }
 }
 
+
+
+static uint32_t device_name_char_add(ble_bmwseat_service_t * p_tcs, const ble_bmwseat_service_init_t * p_tcs_init)
+{
+    ble_gatts_char_md_t char_md;
+    ble_gatts_attr_t    attr_char_value;
+    ble_uuid_t          ble_uuid;
+    ble_gatts_attr_md_t attr_md;
+
+    memset(&char_md, 0, sizeof(char_md));
+
+    char_md.char_props.write         = 1;
+    char_md.char_props.write_wo_resp = 0;
+    char_md.char_props.read          = 1;
+    char_md.p_char_user_desc         = NULL;
+    char_md.p_char_pf                = NULL;
+    char_md.p_user_desc_md           = NULL;
+    char_md.p_cccd_md                = NULL;
+    char_md.p_sccd_md                = NULL;
+    
+    ble_uuid128_t base_uuid = {BLE_UUID_MOTION_SERVICE_BASE_UUID};
+    sd_ble_uuid_vs_add(&base_uuid, &p_tcs->uuid_type);
+
+    ble_uuid.type = p_tcs->uuid_type;
+    ble_uuid.uuid = BLE_UUID_TCS_DEVICE_NAME_CHAR;
+
+
+    memset(&attr_md, 0, sizeof(attr_md));
+
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&attr_md.read_perm);
+    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&attr_md.write_perm);
+
+    attr_md.vloc    = BLE_GATTS_VLOC_STACK;
+    attr_md.rd_auth = 0;
+    attr_md.wr_auth = 1;
+    attr_md.vlen    = 1;
+
+    memset(&attr_char_value, 0, sizeof(attr_char_value));
+
+    attr_char_value.p_uuid    = &ble_uuid;
+    attr_char_value.p_attr_md = &attr_md;
+    attr_char_value.init_len  = 6;
+    attr_char_value.init_offs = 0;
+    attr_char_value.p_value   = "Thingy";
+    attr_char_value.max_len   = BLE_TCS_DEVICE_NAME_LEN_MAX;
+
+      return sd_ble_gatts_characteristic_add(p_tcs->service_handle, &char_md,
+      &attr_char_value,
+      &p_tcs->dev_name_handles);
+
+    //return sd_ble_gatts_characteristic_add(p_tcs->service_handle,
+    //                                       &char_md,
+    //                                       &attr_char_value,
+    //                                       &p_tcs->dev_name_handles);
+}
+
+
+
 /**@brief Function for adding the command characteristic.
  *
  */
@@ -150,14 +208,14 @@ static uint32_t control_char_add(ble_bmwseat_service_t *p_bmwseat_service, const
   char_md.p_sccd_md = NULL;
 
   // Add the control Characteristic UUID
-  ble_uuid128_t base_uuid = {BLE_UUID_BMWSEART_CONTROL_BASE_UUID};
+  ble_uuid128_t base_uuid = {BLE_UUID_MOTION_CONFIG_BASE_UUID};
   err_code = sd_ble_uuid_vs_add(&base_uuid, &p_bmwseat_service->uuid_type);
   if (err_code != NRF_SUCCESS) {
     return err_code;
   }
 
   ble_uuid.type = p_bmwseat_service->uuid_type;
-  ble_uuid.uuid = BLE_UUID_BMWSEART_CONTROL_UUID;
+  ble_uuid.uuid = BLE_UUID_MOTION_CONFIG_UUID;
 
   // Configure the characteristic value's metadata
   memset(&attr_md, 0, sizeof(attr_md));
@@ -216,14 +274,14 @@ static uint32_t bmw_pressure_char_add(ble_bmwseat_service_t *p_bmwseat_service, 
   char_md.p_sccd_md = NULL;
 
   // Add the biologue Data I/O Characteristic UUID
-  ble_uuid128_t base_uuid = {BLE_UUID_BMWSEART_INFO_BASE_UUID};
+  ble_uuid128_t base_uuid = {BLE_UUID_MOTION_QUAT_BASE_UUID};
   err_code = sd_ble_uuid_vs_add(&base_uuid, &p_bmwseat_service->uuid_type);
   if (err_code != NRF_SUCCESS) {
     return err_code;
   }
 
   ble_uuid.type = p_bmwseat_service->uuid_type;
-  ble_uuid.uuid = BLE_UUID_BMWSEART_INFO_UUID;
+  ble_uuid.uuid = BLE_UUID_MOTION_QUAT_UUID;
 
   // Configure the characteristic value's metadata
   memset(&attr_md, 0, sizeof(attr_md));
@@ -250,7 +308,7 @@ static uint32_t bmw_pressure_char_add(ble_bmwseat_service_t *p_bmwseat_service, 
 /**@brief Function for adding the time characteristic.
  *
  */
-static uint32_t bmwseat_status_char_add(ble_bmwseat_service_t *p_bmwseat_service, const ble_bmwseat_service_init_t *p_bmwseat_service_init) {
+static uint32_t bmwseat_motion_raw_add(ble_bmwseat_service_t *p_bmwseat_service, const ble_bmwseat_service_init_t *p_bmwseat_service_init) {
   uint32_t err_code;
   ble_gatts_char_md_t char_md;
   ble_gatts_attr_md_t cccd_md;
@@ -266,11 +324,11 @@ static uint32_t bmwseat_status_char_add(ble_bmwseat_service_t *p_bmwseat_service
 
   // Configure the characteristic metadata.
   memset(&char_md, 0, sizeof(char_md));
-  char_md.char_props.read = 1;
+  char_md.char_props.read = 0;
   char_md.char_props.write = 0;
   char_md.char_props.write_wo_resp = 0;
-  char_md.char_props.notify = 0;
-  char_md.p_char_user_desc = "Seat status.";
+  char_md.char_props.notify = 1;
+  char_md.p_char_user_desc = "raw data";
   char_md.char_user_desc_max_size = 12;
   char_md.char_user_desc_size = 12;
   char_md.p_char_pf = NULL;
@@ -279,14 +337,142 @@ static uint32_t bmwseat_status_char_add(ble_bmwseat_service_t *p_bmwseat_service
   char_md.p_sccd_md = NULL;
 
   // Add the biologue Data I/O Characteristic UUID
-  ble_uuid128_t base_uuid = {BLE_UUID_BMWSEART_STATUS_BASE_UUID};
+  ble_uuid128_t base_uuid = {BLE_UUID_MOTION_RAW_BASE_UUID};
   err_code = sd_ble_uuid_vs_add(&base_uuid, &p_bmwseat_service->uuid_type);
   if (err_code != NRF_SUCCESS) {
     return err_code;
   }
 
   ble_uuid.type = p_bmwseat_service->uuid_type;
-  ble_uuid.uuid = BLE_UUID_BMWSEART_STATUS_UUID;
+  ble_uuid.uuid = BLE_UUID_MOTION_RAW_UUID;
+
+  // Configure the characteristic value's metadata
+  memset(&attr_md, 0, sizeof(attr_md));
+  BLE_GAP_CONN_SEC_MODE_SET_OPEN(&attr_md.read_perm);
+  BLE_GAP_CONN_SEC_MODE_SET_OPEN(&attr_md.write_perm);
+  attr_md.vloc = BLE_GATTS_VLOC_STACK;
+  attr_md.rd_auth = 0;
+  attr_md.wr_auth = 0;
+  attr_md.vlen = 1;
+
+  // Configure the characteristic value
+  attr_char_value.p_uuid = &ble_uuid;
+  attr_char_value.p_attr_md = &attr_md;
+  attr_char_value.init_len = 20;
+  attr_char_value.init_offs = 0;
+  attr_char_value.max_len = 30;
+  attr_char_value.p_value = NULL;
+
+  return sd_ble_gatts_characteristic_add(p_bmwseat_service->service_handle, &char_md,
+      &attr_char_value,
+      &p_bmwseat_service->motion_raw_handles);
+}
+
+
+
+
+static uint32_t bmwseat_motion_euler_add(ble_bmwseat_service_t *p_bmwseat_service, const ble_bmwseat_service_init_t *p_bmwseat_service_init) {
+
+  uint32_t err_code;
+  ble_gatts_char_md_t char_md;
+  ble_gatts_attr_md_t cccd_md;
+  ble_gatts_attr_t attr_char_value;
+  ble_uuid_t ble_uuid;
+  ble_gatts_attr_md_t attr_md;
+
+  // Configure the CCCD which is needed for Notifications and Indications
+  memset(&cccd_md, 0, sizeof(cccd_md));
+  BLE_GAP_CONN_SEC_MODE_SET_OPEN(&cccd_md.read_perm);
+  BLE_GAP_CONN_SEC_MODE_SET_OPEN(&cccd_md.write_perm);
+  cccd_md.vloc = BLE_GATTS_VLOC_STACK;
+
+  // Configure the characteristic metadata.
+  memset(&char_md, 0, sizeof(char_md));
+  char_md.char_props.read = 0;
+  char_md.char_props.write = 0;
+  char_md.char_props.write_wo_resp = 0;
+  char_md.char_props.notify = 1;
+  char_md.p_char_user_desc = "motion euler angle";
+  char_md.char_user_desc_max_size = 20;
+  char_md.char_user_desc_size = 20;
+  char_md.p_char_pf = NULL;
+  char_md.p_user_desc_md = NULL;
+  char_md.p_cccd_md = &cccd_md;
+  char_md.p_sccd_md = NULL;
+
+  // Add the biologue Data I/O Characteristic UUID
+  ble_uuid128_t base_uuid = {BLE_UUID_MOTION_EULER_BASE_UUID};
+  err_code = sd_ble_uuid_vs_add(&base_uuid, &p_bmwseat_service->uuid_type);
+  if (err_code != NRF_SUCCESS) {
+    return err_code;
+  }
+
+  ble_uuid.type = p_bmwseat_service->uuid_type;
+  ble_uuid.uuid = BLE_UUID_MOTION_EULER_UUID;
+
+  // Configure the characteristic value's metadata
+  memset(&attr_md, 0, sizeof(attr_md));
+  BLE_GAP_CONN_SEC_MODE_SET_OPEN(&attr_md.read_perm);
+  attr_md.vloc = BLE_GATTS_VLOC_USER;
+  attr_md.rd_auth = 0;
+  attr_md.wr_auth = 0;
+  attr_md.vlen = 0;
+
+  // Configure the characteristic value
+  memset(&attr_char_value, 0, sizeof(attr_char_value));
+  attr_char_value.p_uuid = &ble_uuid;
+  attr_char_value.p_attr_md = &attr_md;
+  attr_char_value.init_len = VALUE_LEN_STATUS;
+  attr_char_value.init_offs = 0;
+  attr_char_value.max_len = VALUE_LEN_STATUS;
+  attr_char_value.p_value = bmw_status;
+
+  return sd_ble_gatts_characteristic_add(p_bmwseat_service->service_handle, &char_md,
+      &attr_char_value,
+      &p_bmwseat_service->motion_euler_handles);
+
+
+}
+
+
+static uint32_t bmwseat_motion_rotation_add(ble_bmwseat_service_t *p_bmwseat_service, const ble_bmwseat_service_init_t *p_bmwseat_service_init) {
+  
+  uint32_t err_code;
+  ble_gatts_char_md_t char_md;
+  ble_gatts_attr_md_t cccd_md;
+  ble_gatts_attr_t attr_char_value;
+  ble_uuid_t ble_uuid;
+  ble_gatts_attr_md_t attr_md;
+
+  // Configure the CCCD which is needed for Notifications and Indications
+  memset(&cccd_md, 0, sizeof(cccd_md));
+  BLE_GAP_CONN_SEC_MODE_SET_OPEN(&cccd_md.read_perm);
+  BLE_GAP_CONN_SEC_MODE_SET_OPEN(&cccd_md.write_perm);
+  cccd_md.vloc = BLE_GATTS_VLOC_STACK;
+
+  // Configure the characteristic metadata.
+  memset(&char_md, 0, sizeof(char_md));
+  char_md.char_props.read = 0;
+  char_md.char_props.write = 0;
+  char_md.char_props.write_wo_resp = 0;
+  char_md.char_props.notify = 1;
+  char_md.p_char_user_desc = "motion rotation matrix";
+  char_md.char_user_desc_max_size = 20;
+  char_md.char_user_desc_size = 20;
+  char_md.p_char_pf = NULL;
+  char_md.p_user_desc_md = NULL;
+  char_md.p_cccd_md = &cccd_md;
+  char_md.p_sccd_md = NULL;
+
+  // Add the biologue Data I/O Characteristic UUID
+  ble_uuid128_t base_uuid = {BLE_UUID_MOTION_ROTATION_BASE_UUID};
+  err_code = sd_ble_uuid_vs_add(&base_uuid, &p_bmwseat_service->uuid_type);
+  if (err_code != NRF_SUCCESS) {
+    return err_code;
+  }
+
+  ble_uuid.type = p_bmwseat_service->uuid_type;
+  ble_uuid.uuid = BLE_UUID_MOTION_ROTATION_UUID;
 
   // Configure the characteristic value's metadata
   memset(&attr_md, 0, sizeof(attr_md));
@@ -308,7 +494,142 @@ static uint32_t bmwseat_status_char_add(ble_bmwseat_service_t *p_bmwseat_service
   return sd_ble_gatts_characteristic_add(p_bmwseat_service->service_handle, &char_md,
       &attr_char_value,
       &p_bmwseat_service->bmw_status_handles);
+
+
+
+
+
 }
+
+static uint32_t bmwseat_motion_heading_add(ble_bmwseat_service_t *p_bmwseat_service, const ble_bmwseat_service_init_t *p_bmwseat_service_init) {
+
+    uint32_t err_code;
+  ble_gatts_char_md_t char_md;
+  ble_gatts_attr_md_t cccd_md;
+  ble_gatts_attr_t attr_char_value;
+  ble_uuid_t ble_uuid;
+  ble_gatts_attr_md_t attr_md;
+
+  // Configure the CCCD which is needed for Notifications and Indications
+  memset(&cccd_md, 0, sizeof(cccd_md));
+  BLE_GAP_CONN_SEC_MODE_SET_OPEN(&cccd_md.read_perm);
+  BLE_GAP_CONN_SEC_MODE_SET_OPEN(&cccd_md.write_perm);
+  cccd_md.vloc = BLE_GATTS_VLOC_STACK;
+
+  // Configure the characteristic metadata.
+  memset(&char_md, 0, sizeof(char_md));
+  char_md.char_props.read = 0;
+  char_md.char_props.write = 0;
+  char_md.char_props.write_wo_resp = 0;
+  char_md.char_props.notify = 1;
+  char_md.p_char_user_desc = "motion heading";
+  char_md.char_user_desc_max_size = 20;
+  char_md.char_user_desc_size = 20;
+  char_md.p_char_pf = NULL;
+  char_md.p_user_desc_md = NULL;
+  char_md.p_cccd_md = &cccd_md;
+  char_md.p_sccd_md = NULL;
+
+  // Add the biologue Data I/O Characteristic UUID
+  ble_uuid128_t base_uuid = {BLE_UUID_MOTION_HEADING_BASE_UUID};
+  err_code = sd_ble_uuid_vs_add(&base_uuid, &p_bmwseat_service->uuid_type);
+  if (err_code != NRF_SUCCESS) {
+    return err_code;
+  }
+
+  ble_uuid.type = p_bmwseat_service->uuid_type;
+  ble_uuid.uuid = BLE_UUID_MOTION_HEADING_UUID;
+
+  // Configure the characteristic value's metadata
+  memset(&attr_md, 0, sizeof(attr_md));
+  BLE_GAP_CONN_SEC_MODE_SET_OPEN(&attr_md.read_perm);
+  attr_md.vloc = BLE_GATTS_VLOC_USER;
+  attr_md.rd_auth = 0;
+  attr_md.wr_auth = 0;
+  attr_md.vlen = 0;
+
+  // Configure the characteristic value
+  memset(&attr_char_value, 0, sizeof(attr_char_value));
+  attr_char_value.p_uuid = &ble_uuid;
+  attr_char_value.p_attr_md = &attr_md;
+  attr_char_value.init_len = VALUE_LEN_STATUS;
+  attr_char_value.init_offs = 0;
+  attr_char_value.max_len = VALUE_LEN_STATUS;
+  attr_char_value.p_value = bmw_status;
+
+  return sd_ble_gatts_characteristic_add(p_bmwseat_service->service_handle, &char_md,
+      &attr_char_value,
+      &p_bmwseat_service->bmw_status_handles);
+
+
+
+}
+
+static uint32_t bmwseat_motion_gravity_add(ble_bmwseat_service_t *p_bmwseat_service, const ble_bmwseat_service_init_t *p_bmwseat_service_init) {
+
+
+  uint32_t err_code;
+  ble_gatts_char_md_t char_md;
+  ble_gatts_attr_md_t cccd_md;
+  ble_gatts_attr_t attr_char_value;
+  ble_uuid_t ble_uuid;
+  ble_gatts_attr_md_t attr_md;
+
+  // Configure the CCCD which is needed for Notifications and Indications
+  memset(&cccd_md, 0, sizeof(cccd_md));
+  BLE_GAP_CONN_SEC_MODE_SET_OPEN(&cccd_md.read_perm);
+  BLE_GAP_CONN_SEC_MODE_SET_OPEN(&cccd_md.write_perm);
+  cccd_md.vloc = BLE_GATTS_VLOC_STACK;
+
+  // Configure the characteristic metadata.
+  memset(&char_md, 0, sizeof(char_md));
+  char_md.char_props.read = 0;
+  char_md.char_props.write = 0;
+  char_md.char_props.write_wo_resp = 0;
+  char_md.char_props.notify = 1;
+  char_md.p_char_user_desc = "motion gravity";
+  char_md.char_user_desc_max_size = 20;
+  char_md.char_user_desc_size = 20;
+  char_md.p_char_pf = NULL;
+  char_md.p_user_desc_md = NULL;
+  char_md.p_cccd_md = &cccd_md;
+  char_md.p_sccd_md = NULL;
+
+  // Add the biologue Data I/O Characteristic UUID
+  ble_uuid128_t base_uuid = {BLE_UUID_MOTION_GRAVITY_BASE_UUID};
+  err_code = sd_ble_uuid_vs_add(&base_uuid, &p_bmwseat_service->uuid_type);
+  if (err_code != NRF_SUCCESS) {
+    return err_code;
+  }
+
+  ble_uuid.type = p_bmwseat_service->uuid_type;
+  ble_uuid.uuid = BLE_UUID_MOTION_GRAVITY_UUID;
+
+  // Configure the characteristic value's metadata
+  memset(&attr_md, 0, sizeof(attr_md));
+  BLE_GAP_CONN_SEC_MODE_SET_OPEN(&attr_md.read_perm);
+  BLE_GAP_CONN_SEC_MODE_SET_OPEN(&attr_md.write_perm);
+  attr_md.vloc = BLE_GATTS_VLOC_STACK;
+  attr_md.rd_auth = 0;
+  attr_md.wr_auth = 0;
+  attr_md.vlen = 1;
+
+  // Configure the characteristic value
+  attr_char_value.p_uuid = &ble_uuid;
+  attr_char_value.p_attr_md = &attr_md;
+  attr_char_value.init_len = 12;
+  attr_char_value.init_offs = 0;
+  attr_char_value.max_len = 100;
+  attr_char_value.p_value = NULL;
+
+  return sd_ble_gatts_characteristic_add(p_bmwseat_service->service_handle, &char_md,
+      &attr_char_value,
+      &p_bmwseat_service->motion_gravity_handles);
+
+
+}
+
+
 
 
 uint32_t ble_bmwseat_service_init(ble_bmwseat_service_t *p_bmwseat_service, const ble_bmwseat_service_init_t *p_bmwseat_service_init) {
@@ -320,14 +641,14 @@ uint32_t ble_bmwseat_service_init(ble_bmwseat_service_t *p_bmwseat_service, cons
   p_bmwseat_service->evt_handler = p_bmwseat_service_init->evt_handler;
 
   // Add service
-  ble_uuid128_t base_uuid = {BLE_UUID_BMWSEART_SERVICE_BASE_UUID};
+  ble_uuid128_t base_uuid = {BLE_UUID_MOTION_SERVICE_BASE_UUID};
   err_code = sd_ble_uuid_vs_add(&base_uuid, &p_bmwseat_service->uuid_type);
   if (err_code != NRF_SUCCESS) {
     return err_code;
   }
 
   ble_uuid.type = p_bmwseat_service->uuid_type;
-  ble_uuid.uuid = BLE_UUID_BMWSEART_SERVICE_UUID;
+  ble_uuid.uuid = BLE_UUID_MOTION_SERVICE_UUID;
 
   err_code = sd_ble_gatts_service_add(BLE_GATTS_SRVC_TYPE_PRIMARY, &ble_uuid, &p_bmwseat_service->service_handle);
   if (err_code != NRF_SUCCESS) {
@@ -345,11 +666,38 @@ uint32_t ble_bmwseat_service_init(ble_bmwseat_service_t *p_bmwseat_service, cons
     return err_code;
   }
 
-  err_code = bmwseat_status_char_add(p_bmwseat_service, p_bmwseat_service_init);
+  err_code = bmwseat_motion_raw_add(p_bmwseat_service, p_bmwseat_service_init);
   if (err_code != NRF_SUCCESS) {
     return err_code;
   }
   
+  err_code = bmwseat_motion_euler_add(p_bmwseat_service, p_bmwseat_service_init);
+  if (err_code != NRF_SUCCESS) {
+    return err_code;
+  }
+  
+    err_code = bmwseat_motion_rotation_add(p_bmwseat_service, p_bmwseat_service_init);
+  if (err_code != NRF_SUCCESS) {
+    return err_code;
+  }
+
+    err_code = bmwseat_motion_heading_add(p_bmwseat_service, p_bmwseat_service_init);
+  if (err_code != NRF_SUCCESS) {
+    return err_code;
+  }
+
+    err_code = bmwseat_motion_gravity_add(p_bmwseat_service, p_bmwseat_service_init);
+  if (err_code != NRF_SUCCESS) {
+    return err_code;
+  }
+
+  //    err_code = device_name_char_add(p_bmwseat_service, p_bmwseat_service_init);
+  //if (err_code != NRF_SUCCESS) {
+  //  return err_code;
+  //}
+
+
+
   return NRF_SUCCESS;
 }
 
@@ -363,6 +711,163 @@ extern QueueHandle_t uart_rx_queue;
 static void send_ack_to_phone() {
 
 }
+/*
+uint32_t ble_bmw_notify(ble_bmwseat_service_t *p_bmwseat_service, uint8_t *p_data, uint8_t data_sz) {
+  if (p_bmwseat_service == NULL) {
+    return NRF_ERROR_NULL;
+  }
+
+  uint32_t err_code = NRF_SUCCESS;
+  ble_gatts_value_t gatts_value;
+
+  // Initialize value struct.
+  memset(&gatts_value, 0, sizeof(gatts_value));
+
+  gatts_value.len = data_sz;
+  gatts_value.offset = 0;
+  gatts_value.p_value = p_data;
+  
+  // Update database.
+  err_code = sd_ble_gatts_value_set(p_bmwseat_service->conn_handle,
+      p_bmwseat_service->bmw_pressure_handles.value_handle,
+      &gatts_value);
+  if (err_code != NRF_SUCCESS) {
+    return err_code;
+  }
+
+  // Send value if connected and notifying.
+  if ((p_bmwseat_service->conn_handle != BLE_CONN_HANDLE_INVALID)) {
+    ble_gatts_hvx_params_t hvx_params;
+
+    memset(&hvx_params, 0, sizeof(hvx_params));
+
+    hvx_params.handle = p_bmwseat_service->bmw_pressure_handles.value_handle;
+    hvx_params.type = BLE_GATT_HVX_NOTIFICATION;
+    hvx_params.offset = gatts_value.offset;
+    hvx_params.p_len = &gatts_value.len;
+    hvx_params.p_data = gatts_value.p_value;
+
+    err_code = sd_ble_gatts_hvx(p_bmwseat_service->conn_handle, &hvx_params);
+    //NRF_LOG_INFO("sd_ble_gatts_hvx result: %x. \r\n", err_code);
+  } 
+  else {
+    err_code = NRF_ERROR_INVALID_STATE;
+    //NRF_LOG_INFO("sd_ble_gatts_hvx result: NRF_ERROR_INVALID_STATE. \r\n");
+  }
+
+  return err_code;
+}
+
+*/
+
+
+
+uint32_t ble_motion_raw_notify(ble_bmwseat_service_t *p_bmwseat_service, uint8_t *p_data, uint8_t data_sz) {
+  if (p_bmwseat_service == NULL) {
+    return NRF_ERROR_NULL;
+  }
+
+  uint32_t err_code = NRF_SUCCESS;
+  ble_gatts_value_t gatts_value;
+
+  // Initialize value struct.
+  memset(&gatts_value, 0, sizeof(gatts_value));
+
+  gatts_value.len = data_sz;
+  gatts_value.offset = 0;
+  gatts_value.p_value = p_data;
+  
+  // Update database.
+  err_code = sd_ble_gatts_value_set(p_bmwseat_service->conn_handle,
+      p_bmwseat_service->motion_raw_handles.value_handle,
+      &gatts_value);
+  if (err_code != NRF_SUCCESS) {
+    return err_code;
+  }
+
+  // Send value if connected and notifying.
+  if ((p_bmwseat_service->conn_handle != BLE_CONN_HANDLE_INVALID)) {
+    ble_gatts_hvx_params_t hvx_params;
+
+    memset(&hvx_params, 0, sizeof(hvx_params));
+
+    hvx_params.handle = p_bmwseat_service->motion_raw_handles.value_handle;
+    hvx_params.type = BLE_GATT_HVX_NOTIFICATION;
+    hvx_params.offset = gatts_value.offset;
+    hvx_params.p_len = &gatts_value.len;
+    hvx_params.p_data = gatts_value.p_value;
+
+    err_code = sd_ble_gatts_hvx(p_bmwseat_service->conn_handle, &hvx_params);
+    //NRF_LOG_INFO("sd_ble_gatts_hvx result: %x. \r\n", err_code);
+  } 
+  else {
+    err_code = NRF_ERROR_INVALID_STATE;
+    //NRF_LOG_INFO("sd_ble_gatts_hvx result: NRF_ERROR_INVALID_STATE. \r\n");
+  }
+
+  return err_code;
+}
+
+
+
+
+uint32_t ble_motion_gravity_notify(ble_bmwseat_service_t *p_bmwseat_service, uint8_t *p_data, uint8_t data_sz) {
+  if (p_bmwseat_service == NULL) {
+    return NRF_ERROR_NULL;
+  }
+
+  uint32_t err_code = NRF_SUCCESS;
+  ble_gatts_value_t gatts_value;
+
+  // Initialize value struct.
+  memset(&gatts_value, 0, sizeof(gatts_value));
+
+  gatts_value.len = data_sz;
+  gatts_value.offset = 0;
+  gatts_value.p_value = p_data;
+  
+  // Update database.
+  err_code = sd_ble_gatts_value_set(p_bmwseat_service->conn_handle,
+      p_bmwseat_service->motion_gravity_handles.value_handle,
+      &gatts_value);
+  if (err_code != NRF_SUCCESS) {
+    return err_code;
+  }
+
+  // Send value if connected and notifying.
+  if ((p_bmwseat_service->conn_handle != BLE_CONN_HANDLE_INVALID)) {
+    ble_gatts_hvx_params_t hvx_params;
+
+    memset(&hvx_params, 0, sizeof(hvx_params));
+
+    hvx_params.handle = p_bmwseat_service->motion_gravity_handles.value_handle;
+    hvx_params.type = BLE_GATT_HVX_NOTIFICATION;
+    hvx_params.offset = gatts_value.offset;
+    hvx_params.p_len = &gatts_value.len;
+    hvx_params.p_data = gatts_value.p_value;
+
+    err_code = sd_ble_gatts_hvx(p_bmwseat_service->conn_handle, &hvx_params);
+    //NRF_LOG_INFO("sd_ble_gatts_hvx result: %x. \r\n", err_code);
+  } 
+  else {
+    err_code = NRF_ERROR_INVALID_STATE;
+    //NRF_LOG_INFO("sd_ble_gatts_hvx result: NRF_ERROR_INVALID_STATE. \r\n");
+  }
+
+  return err_code;
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 /*
  {
