@@ -62,7 +62,7 @@
  </Watch4>
  <Files>
   <SessionOpenFile windowGroup="DockEditLeft" x="47" y="315" useTextEdit="1" openedFrom="" useBinaryEdit="0" left="0" path="../config/sdk_config.h" selected="0" top="301" codecName="Default"/>
-  <SessionOpenFile windowGroup="DockEditLeft" x="73" y="987" useTextEdit="1" openedFrom="" useBinaryEdit="0" left="0" path="../../../main.c" selected="1" top="967" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="976" useTextEdit="1" openedFrom="" useBinaryEdit="0" left="0" path="../../../main.c" selected="1" top="963" codecName="Default"/>
   <SessionOpenFile windowGroup="DockEditLeft" x="0" y="213" useTextEdit="1" openedFrom="" useBinaryEdit="0" left="0" path="../../../../../../external/freertos/portable/CMSIS/nrf52/port_cmsis_systick.c" selected="0" top="198" codecName="Default"/>
   <SessionOpenFile windowGroup="DockEditLeft" x="16" y="93" useTextEdit="1" openedFrom="" useBinaryEdit="0" left="0" path="../../../../../../components/libraries/util/app_error_weak.c" selected="0" top="84" codecName="Default"/>
   <SessionOpenFile windowGroup="DockEditLeft" x="34" y="40" useTextEdit="1" openedFrom="" useBinaryEdit="0" left="0" path="../../../../../../components/ble/nrf_ble_qwr/nrf_ble_qwr.c" selected="0" top="12" codecName="Default"/>

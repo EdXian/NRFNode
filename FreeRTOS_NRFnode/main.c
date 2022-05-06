@@ -972,6 +972,27 @@ float vec[3];
 int16_t vec_16[9]={0};
 
 
+
+
+
+void drive_wled(uint8_t num){
+
+  for(uint8_t j=0;j<num;j++){
+    for(uint8_t i=0;i<24;i++){
+      if(i%3 == 0){
+              //nrf_gpio_pin_toggle(WLED_GPIO);
+      
+       nrf_gpio_pin_toggle(WLED_GPIO);
+       nrf_delay_us(1);
+      }
+    
+    }
+    nrf_gpio_pin_set(WLED_GPIO);
+  }
+
+}
+
+
 void notify_thread(void *p){
 
   float count =0 ;
@@ -988,8 +1009,11 @@ void notify_thread(void *p){
     //ble_motion_raw_notify(&m_bmwseat,(uint8_t*)vec_16, sizeof(vec_16));
     
     //count++;
-    nrf_gpio_pin_toggle(WLED_GPIO);
+    //nrf_gpio_pin_toggle(WLED_GPIO);
     //nrf_gpio_pin_set(WLED_GPIO);
+    //nrf_gpio_pin_set(WLED_GPIO);
+    //vTaskDelay(2);
+    drive_wled(3);
     vTaskDelay(2);
   }
 }
