@@ -117,6 +117,8 @@
 #define USB_THREAD_MAX_BLOCK_TIME portMAX_DELAY
 
 
+#define WLED_GPIO 33
+
 #define LED_BLE_NUS_CONN (BSP_BOARD_LED_0)
 #define LED_BLE_NUS_RX   (BSP_BOARD_LED_1)
 #define LED_CDC_ACM_CONN (BSP_BOARD_LED_2)
@@ -287,7 +289,7 @@ static void nus_data_handler(ble_nus_evt_t * p_evt)
 
     if (p_evt->type == BLE_NUS_EVT_RX_DATA)
     {
-        bsp_board_led_invert(LED_BLE_NUS_RX);
+        //bsp_board_led_invert(LED_BLE_NUS_RX);
         NRF_LOG_DEBUG("Received data from BLE NUS. Writing data on CDC ACM.");
         NRF_LOG_HEXDUMP_DEBUG(p_evt->params.rx_data.p_data, p_evt->params.rx_data.length);
         memcpy(m_nus_data_array, p_evt->params.rx_data.p_data, p_evt->params.rx_data.length);
@@ -760,7 +762,7 @@ static void cdc_acm_user_ev_handler(app_usbd_class_inst_t const * p_inst,
                 {
                     if (index > 1)
                     {
-                        bsp_board_led_invert(LED_CDC_ACM_RX);
+                        //bsp_board_led_invert(LED_CDC_ACM_RX);
                         NRF_LOG_DEBUG("Ready to send data over BLE NUS");
                         NRF_LOG_HEXDUMP_DEBUG(m_cdc_data_array, index);
 
@@ -967,7 +969,7 @@ static void idle_state_handle(void)
 
 float vec[3];
 
-
+int16_t vec_16[9]={0};
 
 
 void notify_thread(void *p){
@@ -975,15 +977,20 @@ void notify_thread(void *p){
   float count =0 ;
   for(;;){
    
-    vec[0] = sin(2*3.14159/0.3*count);
-    vec[1] = cos(2*3.14159/0.7*count) + sin(2*3.14159/0.3*count);
-    vec[2] =  cos(2*3.14159/0.7*count);
+    //vec[0] = 100*sin(2*3.14159/0.3*count);
+    //vec[1] = 100*cos(2*3.14159/0.7*count) + 100*sin(2*3.14159/0.3*count);
+    //vec[2] = 100*cos(2*3.14159/0.7*count);
 
+    //vec_16[0] = 100*sin(2*3.14159/0.3*count);
+    //vec_16[1] = 100*cos(2*3.14159/0.7*count) + 100*sin(2*3.14159/0.3*count);
+    //vec_16[2] = 100*cos(2*3.14159/0.7*count);
     //ble_motion_gravity_notify(&m_bmwseat,(uint8_t*)vec, sizeof(vec));
-    ble_motion_raw_notify(&m_bmwseat,(uint8_t*)vec, sizeof(vec));
+    //ble_motion_raw_notify(&m_bmwseat,(uint8_t*)vec_16, sizeof(vec_16));
     
-     count++;
-    vTaskDelay(100);
+    //count++;
+    nrf_gpio_pin_toggle(WLED_GPIO);
+    //nrf_gpio_pin_set(WLED_GPIO);
+    vTaskDelay(2);
   }
 }
 
@@ -1042,7 +1049,7 @@ int main(void)
         APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
     }
     NRF_LOG_INFO("USBD BLE UART example started.");
-
+    nrf_gpio_cfg_output(WLED_GPIO);
     ble_stack_init();
     gap_params_init();
     gatt_init();
