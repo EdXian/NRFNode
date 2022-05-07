@@ -94,6 +94,7 @@
 #include "nrf_drv_power.h"
 
 #include "motion_service.h"
+#include "ws2812_spi.h"
 /**
  * The size of the stack for the Logger task (in 32-bit words).
  * Logger uses sprintf internally so it is a rather stack hungry process.
@@ -454,6 +455,7 @@ static void on_adv_evt(ble_adv_evt_t ble_adv_evt)
     }
 }
 
+static ble_is_connected = false;
 
 /**
  * @brief Function for handling BLE events.
@@ -473,12 +475,14 @@ static void ble_evt_handler(ble_evt_t const * p_ble_evt, void * p_context)
             APP_ERROR_CHECK(err_code);
             bsp_board_led_on(LED_BLE_NUS_CONN);
             m_conn_handle = p_ble_evt->evt.gap_evt.conn_handle;
+            ble_is_connected = true;
             break;
 
         case BLE_GAP_EVT_DISCONNECTED:
             NRF_LOG_INFO("BLE NUS disconnected");
             // LED indication will be changed when advertising starts.
             m_conn_handle = BLE_CONN_HANDLE_INVALID;
+            ble_is_connected = false;
             break;
 
         case BLE_GAP_EVT_PHY_UPDATE_REQUEST:
@@ -975,45 +979,41 @@ int16_t vec_16[9]={0};
 
 
 
-void drive_wled(uint8_t num){
-
-  for(uint8_t j=0;j<num;j++){
-    for(uint8_t i=0;i<24;i++){
-      if(i%3 == 0){
-              //nrf_gpio_pin_toggle(WLED_GPIO);
-      
-       nrf_gpio_pin_toggle(WLED_GPIO);
-       nrf_delay_us(1);
-      }
-    
-    }
-    nrf_gpio_pin_set(WLED_GPIO);
-  }
-
-}
-
-
 void notify_thread(void *p){
-
-  float count =0 ;
+  ws2812_spi_init();
+  int count =0 ;
+  int breath;
   for(;;){
-   
-    //vec[0] = 100*sin(2*3.14159/0.3*count);
-    //vec[1] = 100*cos(2*3.14159/0.7*count) + 100*sin(2*3.14159/0.3*count);
-    //vec[2] = 100*cos(2*3.14159/0.7*count);
+
+    vec[0] = 100*sin(2*3.14159/0.3*count);
+    vec[1] = 100*cos(2*3.14159/0.7*count) + 100*sin(2*3.14159/0.3*count);
+    vec[2] = 100*cos(2*3.14159/0.7*count);
+
 
     //vec_16[0] = 100*sin(2*3.14159/0.3*count);
     //vec_16[1] = 100*cos(2*3.14159/0.7*count) + 100*sin(2*3.14159/0.3*count);
     //vec_16[2] = 100*cos(2*3.14159/0.7*count);
     //ble_motion_gravity_notify(&m_bmwseat,(uint8_t*)vec, sizeof(vec));
     //ble_motion_raw_notify(&m_bmwseat,(uint8_t*)vec_16, sizeof(vec_16));
+    //ws281x_closeAll();
+    //ws281x_setPixelColor(0,0x00040404);
+    if(ble_is_connected){
+        ws281x_setPixelRGB(0,0x00,0x00,((breath&0xff)%0x40));
+        ws281x_setPixelRGB(1,0x00,0x00,((breath&0xff)%0x40));
+        ws281x_setPixelRGB(2,0x00,0x00,((breath&0xff)%0x40));
+    }else{
+        ws281x_setPixelRGB(0,((breath&0xff)%0x40),0x00,0x00);
+        ws281x_setPixelRGB(1,0x00,0x00,0x00);
+        ws281x_setPixelRGB(2,0x00,0x00,0x00);
+    }
     
-    //count++;
-    //nrf_gpio_pin_toggle(WLED_GPIO);
-    //nrf_gpio_pin_set(WLED_GPIO);
-    //nrf_gpio_pin_set(WLED_GPIO);
-    //vTaskDelay(2);
-    drive_wled(3);
+    
+    count++;
+    if(count % 20 == 0){
+      ble_motion_gravity_notify(&m_bmwseat,(uint8_t*)vec, sizeof(vec));
+      breath++;
+    }
+    //drive_wled(3);
     vTaskDelay(2);
   }
 }
