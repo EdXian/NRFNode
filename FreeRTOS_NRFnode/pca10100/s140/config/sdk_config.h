@@ -3542,41 +3542,41 @@
 // <e> NRFX_SPIM_ENABLED - nrfx_spim - SPIM peripheral driver
 //==========================================================
 #ifndef NRFX_SPIM_ENABLED
-#define NRFX_SPIM_ENABLED 0
+#define NRFX_SPIM_ENABLED 1
 #endif
 // <q> NRFX_SPIM0_ENABLED  - Enable SPIM0 instance
  
 
 #ifndef NRFX_SPIM0_ENABLED
-#define NRFX_SPIM0_ENABLED 0
+#define NRFX_SPIM0_ENABLED 1
 #endif
 
 // <q> NRFX_SPIM1_ENABLED  - Enable SPIM1 instance
  
 
 #ifndef NRFX_SPIM1_ENABLED
-#define NRFX_SPIM1_ENABLED 0
+#define NRFX_SPIM1_ENABLED 1
 #endif
 
 // <q> NRFX_SPIM2_ENABLED  - Enable SPIM2 instance
  
 
 #ifndef NRFX_SPIM2_ENABLED
-#define NRFX_SPIM2_ENABLED 0
+#define NRFX_SPIM2_ENABLED 1
 #endif
 
 // <q> NRFX_SPIM3_ENABLED  - Enable SPIM3 instance
  
 
 #ifndef NRFX_SPIM3_ENABLED
-#define NRFX_SPIM3_ENABLED 0
+#define NRFX_SPIM3_ENABLED 1
 #endif
 
 // <q> NRFX_SPIM_EXTENDED_ENABLED  - Enable extended SPIM features
  
 
 #ifndef NRFX_SPIM_EXTENDED_ENABLED
-#define NRFX_SPIM_EXTENDED_ENABLED 0
+#define NRFX_SPIM_EXTENDED_ENABLED 1
 #endif
 
 // <o> NRFX_SPIM_MISO_PULL_CFG  - MISO pin pull configuration.
@@ -3768,27 +3768,27 @@
 // <e> NRFX_SPI_ENABLED - nrfx_spi - SPI peripheral driver
 //==========================================================
 #ifndef NRFX_SPI_ENABLED
-#define NRFX_SPI_ENABLED 0
+#define NRFX_SPI_ENABLED 1
 #endif
 // <q> NRFX_SPI0_ENABLED  - Enable SPI0 instance
  
 
 #ifndef NRFX_SPI0_ENABLED
-#define NRFX_SPI0_ENABLED 0
+#define NRFX_SPI0_ENABLED 1
 #endif
 
 // <q> NRFX_SPI1_ENABLED  - Enable SPI1 instance
  
 
 #ifndef NRFX_SPI1_ENABLED
-#define NRFX_SPI1_ENABLED 0
+#define NRFX_SPI1_ENABLED 1
 #endif
 
 // <q> NRFX_SPI2_ENABLED  - Enable SPI2 instance
  
 
 #ifndef NRFX_SPI2_ENABLED
-#define NRFX_SPI2_ENABLED 0
+#define NRFX_SPI2_ENABLED 1
 #endif
 
 // <o> NRFX_SPI_MISO_PULL_CFG  - MISO pin pull configuration.
@@ -5550,7 +5550,7 @@
 // <e> SPIS_ENABLED - nrf_drv_spis - SPIS peripheral driver - legacy layer
 //==========================================================
 #ifndef SPIS_ENABLED
-#define SPIS_ENABLED 0
+#define SPIS_ENABLED 1
 #endif
 // <o> SPIS_DEFAULT_CONFIG_IRQ_PRIORITY  - Interrupt priority
  
@@ -5629,7 +5629,7 @@
 // <e> SPI_ENABLED - nrf_drv_spi - SPI/SPIM peripheral driver - legacy layer
 //==========================================================
 #ifndef SPI_ENABLED
-#define SPI_ENABLED 0
+#define SPI_ENABLED 1
 #endif
 // <o> SPI_DEFAULT_CONFIG_IRQ_PRIORITY  - Interrupt priority
  
@@ -5661,7 +5661,7 @@
 // <e> SPI0_ENABLED - Enable SPI0 instance
 //==========================================================
 #ifndef SPI0_ENABLED
-#define SPI0_ENABLED 0
+#define SPI0_ENABLED 1
 #endif
 // <q> SPI0_USE_EASY_DMA  - Use EasyDMA
  
@@ -5675,7 +5675,7 @@
 // <e> SPI1_ENABLED - Enable SPI1 instance
 //==========================================================
 #ifndef SPI1_ENABLED
-#define SPI1_ENABLED 0
+#define SPI1_ENABLED 1
 #endif
 // <q> SPI1_USE_EASY_DMA  - Use EasyDMA
  
@@ -5689,7 +5689,7 @@
 // <e> SPI2_ENABLED - Enable SPI2 instance
 //==========================================================
 #ifndef SPI2_ENABLED
-#define SPI2_ENABLED 0
+#define SPI2_ENABLED 1
 #endif
 // <q> SPI2_USE_EASY_DMA  - Use EasyDMA
  
@@ -5712,7 +5712,7 @@
 // <e> TIMER_ENABLED - nrf_drv_timer - TIMER periperal driver - legacy layer
 //==========================================================
 #ifndef TIMER_ENABLED
-#define TIMER_ENABLED 0
+#define TIMER_ENABLED 1
 #endif
 // <o> TIMER_DEFAULT_CONFIG_FREQUENCY  - Timer frequency if in Timer mode
  
