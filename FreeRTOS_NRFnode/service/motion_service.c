@@ -120,61 +120,6 @@ void ble_bmwseat_service_on_ble_evt(ble_evt_t const *p_ble_evt, void *p_context)
 
 
 
-static uint32_t device_name_char_add(ble_bmwseat_service_t * p_tcs, const ble_bmwseat_service_init_t * p_tcs_init)
-{
-    ble_gatts_char_md_t char_md;
-    ble_gatts_attr_t    attr_char_value;
-    ble_uuid_t          ble_uuid;
-    ble_gatts_attr_md_t attr_md;
-
-    memset(&char_md, 0, sizeof(char_md));
-
-    char_md.char_props.write         = 1;
-    char_md.char_props.write_wo_resp = 0;
-    char_md.char_props.read          = 1;
-    char_md.p_char_user_desc         = NULL;
-    char_md.p_char_pf                = NULL;
-    char_md.p_user_desc_md           = NULL;
-    char_md.p_cccd_md                = NULL;
-    char_md.p_sccd_md                = NULL;
-    
-    ble_uuid128_t base_uuid = {BLE_UUID_MOTION_SERVICE_BASE_UUID};
-    sd_ble_uuid_vs_add(&base_uuid, &p_tcs->uuid_type);
-
-    ble_uuid.type = p_tcs->uuid_type;
-    ble_uuid.uuid = BLE_UUID_TCS_DEVICE_NAME_CHAR;
-
-
-    memset(&attr_md, 0, sizeof(attr_md));
-
-    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&attr_md.read_perm);
-    BLE_GAP_CONN_SEC_MODE_SET_OPEN(&attr_md.write_perm);
-
-    attr_md.vloc    = BLE_GATTS_VLOC_STACK;
-    attr_md.rd_auth = 0;
-    attr_md.wr_auth = 1;
-    attr_md.vlen    = 1;
-
-    memset(&attr_char_value, 0, sizeof(attr_char_value));
-
-    attr_char_value.p_uuid    = &ble_uuid;
-    attr_char_value.p_attr_md = &attr_md;
-    attr_char_value.init_len  = 6;
-    attr_char_value.init_offs = 0;
-    attr_char_value.p_value   = "Thingy";
-    attr_char_value.max_len   = BLE_TCS_DEVICE_NAME_LEN_MAX;
-
-      return sd_ble_gatts_characteristic_add(p_tcs->service_handle, &char_md,
-      &attr_char_value,
-      &p_tcs->dev_name_handles);
-
-    //return sd_ble_gatts_characteristic_add(p_tcs->service_handle,
-    //                                       &char_md,
-    //                                       &attr_char_value,
-    //                                       &p_tcs->dev_name_handles);
-}
-
-
 
 /**@brief Function for adding the command characteristic.
  *
