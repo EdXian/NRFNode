@@ -66,6 +66,26 @@ uint32_t ws281x_wheel(uint8_t wheelPos) {
 }
 
 
+
+void ws2812_set_buffer(uint16_t n ,uint8_t red, uint8_t green, uint8_t blue){
+    uint8_t i;
+  
+  if(n < PIXEL_NUM)
+  {
+    for(i = 0; i < 24; ++i)
+    {
+      m_tx_data[n][i] = (((ws281x_color(red,green,blue) << i) & 0X800000) ? WS_HIGH : WS_LOW);
+    }
+  }
+
+}
+
+void ws2812_show(){
+
+ws2812_spi_send(0,0,0);
+}
+
+
 void ws281x_setPixelRGB(uint16_t n ,uint8_t red, uint8_t green, uint8_t blue)
 {
   uint8_t i;
