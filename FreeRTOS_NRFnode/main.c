@@ -94,6 +94,7 @@
 #include "nrf_drv_power.h"
 
 #include "motion_service.h"
+#include "info_service.h"
 #include "ws2812_spi.h"
 /**
  * The size of the stack for the Logger task (in 32-bit words).
@@ -175,6 +176,9 @@ APP_USBD_CDC_ACM_GLOBAL_DEF(m_app_cdc_acm,
 
 NRF_BLE_QWR_DEF(m_qwr);             /**< Context for the Queued Write module.*/
 BLE_BMWSEART_DEF(m_bmwseat);
+BLE_INFO_SERVICE_DEF(m_info_service);
+
+
 
 // BLE DEFINES START
 #define APP_BLE_CONN_CFG_TAG            1                                           /**< A tag identifying the SoftDevice BLE configuration. */
@@ -212,8 +216,10 @@ static uint16_t   m_conn_handle          = BLE_CONN_HANDLE_INVALID;             
 static uint16_t   m_ble_nus_max_data_len = BLE_GATT_ATT_MTU_DEFAULT - 3;            /**< Maximum length of data (in bytes) that can be transmitted to the peer by the Nordic UART service module. */
 static ble_uuid_t m_adv_uuids[]          =                                          /**< Universally unique service identifier. */
 {
-    {BLE_UUID_NUS_SERVICE, NUS_SERVICE_UUID_TYPE}
+    {INFO_SERVICE_UUID_SERVICE, NUS_SERVICE_UUID_TYPE}
 };
+//define this uuid service so that the device can be discoverded by thingy app!
+
 static char m_nus_data_array[BLE_NUS_MAX_DATA_LEN];
 
 // BLE DEFINES END
@@ -336,6 +342,27 @@ static void bmwseat_evt_handler(ble_bmwseat_service_t *p_bmwseat_service,
 }
 
 
+static void info_service_evt_handler(ble_info_service_t *p_info_service,
+                                 ble_info_service_evt_t *p_evt) {
+/*
+    // Action to perform when the Data I/O characteristic notifications are
+    // enabled Add your implementation here
+    if (p_evt->evt_type == BLE_BMW_INFO_EVT_NOTIFICATION_ENABLED) {
+        // Possibly save to a global variable to know that notifications are
+        // ENABLED
+        bmw_notify_enble = true;
+        NRF_LOG_INFO("Notifications ENABLED on BMW INFO Characteristic");
+    } else if (p_evt->evt_type == BLE_BMW_INFO_EVT_NOTIFICATION_DISABLED) {
+        // Possibly save to a global variable to know that notifications are
+        // DISABLED
+        NRF_LOG_INFO("Notifications DISABLED on BMW INFO Characteristic");
+    }
+*/
+}
+
+
+
+ret_code_t err;
 static void services_init(void)
 {
     //uint32_t       err_code;
@@ -347,22 +374,27 @@ static void services_init(void)
 
     //err_code = ble_nus_init(&m_nus, &nus_init);
     //APP_ERROR_CHECK(err_code);
-      ret_code_t err_code;
-  nrf_ble_qwr_init_t qwr_init = {0};
+      
+      nrf_ble_qwr_init_t qwr_init = {0};
   
-  qwr_init.error_handler = nrf_qwr_error_handler;
-  err_code = nrf_ble_qwr_init(&m_qwr, &qwr_init);
-  APP_ERROR_CHECK(err_code);
+      qwr_init.error_handler = nrf_qwr_error_handler;
+      err = nrf_ble_qwr_init(&m_qwr, &qwr_init);
+      APP_ERROR_CHECK(err);
 
-  // Initialize the BMW seat service
-  ble_bmwseat_service_init_t bmwseat_init;
-  memset(&bmwseat_init, 0, sizeof(bmwseat_init));
-  bmwseat_init.evt_handler = bmwseat_evt_handler;
-  err_code = ble_bmwseat_service_init(&m_bmwseat, &bmwseat_init);
+      // Initialize the BMW seat service
+      ble_bmwseat_service_init_t bmwseat_init;
+      memset(&bmwseat_init, 0, sizeof(bmwseat_init));
+      bmwseat_init.evt_handler = bmwseat_evt_handler;
+      err = ble_bmwseat_service_init(&m_bmwseat, &bmwseat_init);
 
-  APP_ERROR_CHECK(err_code);
+      ble_info_service_init_t info_service_init;
+      memset(&info_service_init, 0, sizeof(info_service_init));
+      info_service_init.evt_handler = info_service_evt_handler;
+      err = ble_info_service_init(&m_info_service, &info_service_init);
+      
+      //APP_ERROR_CHECK(err);
 
-  NRF_LOG_INFO("Done with services_init()");
+      NRF_LOG_INFO("Done with services_init()");
 }
 
 /**
@@ -981,13 +1013,19 @@ int16_t vec_16[9]={0};
 
 void notify_thread(void *p){
   ws2812_spi_init();
-  int count =0 ;
+  int32_t count =0 ;
+  uint8_t i=9;
+  uint8_t j=18;
+  uint8_t k=27;
+  uint8_t dir_i=1;
+   uint8_t dir_j=1;
+    uint8_t dir_k=1;
   int breath;
   for(;;){
 
-    vec[0] = 100*sin(2*3.14159/0.3*count);
-    vec[1] = 100*cos(2*3.14159/0.7*count) + 100*sin(2*3.14159/0.3*count);
-    vec[2] = 100*cos(2*3.14159/0.7*count);
+    vec[0] = 5*sin(2*3.14159/30*count);
+    vec[1] = 5*cos(2*3.14159/30*count) + 5*sin(2*3.14159/30*count);
+    vec[2] = 5*cos(2*3.14159/30*count);
 
 
     //vec_16[0] = 100*sin(2*3.14159/0.3*count);
@@ -998,20 +1036,50 @@ void notify_thread(void *p){
     //ws281x_closeAll();
     //ws281x_setPixelColor(0,0x00040404);
     if(ble_is_connected){
-        ws281x_setPixelRGB(0,0x00,0x00,((breath&0xff)%0x40));
-        ws281x_setPixelRGB(1,0x00,0x00,((breath&0xff)%0x40));
-        ws281x_setPixelRGB(2,0x00,0x00,((breath&0xff)%0x40));
+        //ws281x_setPixelRGB(0,0x00,0x00,i);
+        //ws281x_setPixelRGB(1,0x00,0x00,(j));
+        //ws281x_setPixelRGB(2,0x00,0x00,(k));
+       
+            ws2812_set_buffer(0,0x00,0x00,i);
+       ws2812_set_buffer(1,0x00,0x00,((j)));
+        ws2812_set_buffer(2,0x00,0x00,((k)));
+        ws2812_show();
     }else{
-        ws281x_setPixelRGB(0,((breath&0xff)%0x40),0x00,0x00);
-        ws281x_setPixelRGB(1,0x00,0x00,0x00);
-        ws281x_setPixelRGB(2,0x00,0x00,0x00);
+        ws2812_set_buffer(0,i,0x00,0x00);
+        ws2812_set_buffer(1,j,0x00,0x00);
+        ws2812_set_buffer(2,k,0x00,0x00);
+        ws2812_show();
     }
     
     
     count++;
-    if(count % 20 == 0){
+    if(count % 10 == 0){
       ble_motion_gravity_notify(&m_bmwseat,(uint8_t*)vec, sizeof(vec));
       breath++;
+      i+=dir_i;
+      j+=dir_j;
+      k+=dir_k;
+      if(i==0x25){
+        dir_i=-1;
+      }
+      if(i==0x00){
+        dir_i=1;
+      }
+
+      if(j==0x25){
+        dir_j=-1;
+      }
+      if(j==0x00){
+        dir_j=1;
+      }
+
+      if(k==0x25){
+        dir_k=-1;
+      }
+      if(k==0x00){
+        dir_k=1;
+      }
+
     }
     //drive_wled(3);
     vTaskDelay(2);
