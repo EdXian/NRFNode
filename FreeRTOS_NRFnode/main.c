@@ -97,7 +97,12 @@
 #include "info_service.h"
 #include "ws2812_spi.h"
 
-#include "nrf_drv_twi.h"
+//#include "nrf_drv_twi.h"
+//#include "nrf_twi.h"
+//#include "nrf_twim.h"
+//#include "nrf_twi_mngr.h"
+//#include "nrf_drv_twi.h"
+#include "imu.h"
 /**
  * The size of the stack for the Logger task (in 32-bit words).
  * Logger uses sprintf internally so it is a rather stack hungry process.
@@ -127,6 +132,8 @@
 #define LED_BLE_NUS_RX   (BSP_BOARD_LED_1)
 #define LED_CDC_ACM_CONN (BSP_BOARD_LED_2)
 #define LED_CDC_ACM_RX   (BSP_BOARD_LED_3)
+
+
 
 #define LED_BLINK_INTERVAL 800
 
@@ -209,7 +216,7 @@ BLE_INFO_SERVICE_DEF(m_info_service);
 #define UART_TX_BUF_SIZE                256                                         /**< UART TX buffer size. */
 #define UART_RX_BUF_SIZE                256                                         /**< UART RX buffer size. */
 
-#define TWI_INSTANCE_ID                 0
+
 
 BLE_NUS_DEF(m_nus, NRF_SDH_BLE_TOTAL_LINK_COUNT);                                   /**< BLE NUS service instance. */
 NRF_BLE_GATT_DEF(m_gatt);                                                           /**< GATT module instance. */
@@ -1009,44 +1016,6 @@ static void idle_state_handle(void)
 float vec[3];
 
 int16_t vec_16[9]={0};
-static const nrf_drv_twi_t m_twi = NRF_DRV_TWI_INSTANCE(TWI_INSTANCE_ID);
-
-void twi_handler(nrf_drv_twi_evt_t const * p_event, void * p_context)
-{
-    switch (p_event->type)
-    {
-        case NRF_DRV_TWI_EVT_DONE:
-            if (p_event->xfer_desc.type == NRF_DRV_TWI_XFER_RX)
-            {
-            //    data_handler(m_sample);
-            }
-            //m_xfer_done = true;
-            break;
-        default:
-            break;
-    }
-}
-
-
-
-void twi_init (void)
-{
-    ret_code_t err_code;
-
-    const nrf_drv_twi_config_t twi_lm75b_config = {
-       .scl                = 10,
-       .sda                = 11,
-       .frequency          = NRF_DRV_TWI_FREQ_100K,
-       .interrupt_priority = APP_IRQ_PRIORITY_HIGH,
-       .clear_bus_init     = false
-    };
-
-    err_code = nrf_drv_twi_init(&m_twi, &twi_lm75b_config, twi_handler, NULL);
-    APP_ERROR_CHECK(err_code);
-
-    nrf_drv_twi_enable(&m_twi);
-}
-
 
 
 void notify_thread(void *p){
@@ -1061,6 +1030,7 @@ void notify_thread(void *p){
     uint8_t dir_k=1;
     uint8_t dir_m=1;
   int breath;
+  imu_init();
   for(;;){
 
     //vec[0] = 5*sin(2*3.14159/30*count);
