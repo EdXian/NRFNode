@@ -96,6 +96,8 @@
 #include "motion_service.h"
 #include "info_service.h"
 #include "ws2812_spi.h"
+
+#include "nrf_drv_twi.h"
 /**
  * The size of the stack for the Logger task (in 32-bit words).
  * Logger uses sprintf internally so it is a rather stack hungry process.
@@ -207,6 +209,7 @@ BLE_INFO_SERVICE_DEF(m_info_service);
 #define UART_TX_BUF_SIZE                256                                         /**< UART TX buffer size. */
 #define UART_RX_BUF_SIZE                256                                         /**< UART RX buffer size. */
 
+#define TWI_INSTANCE_ID                 0
 
 BLE_NUS_DEF(m_nus, NRF_SDH_BLE_TOTAL_LINK_COUNT);                                   /**< BLE NUS service instance. */
 NRF_BLE_GATT_DEF(m_gatt);                                                           /**< GATT module instance. */
@@ -1006,31 +1009,68 @@ static void idle_state_handle(void)
 float vec[3];
 
 int16_t vec_16[9]={0};
+static const nrf_drv_twi_t m_twi = NRF_DRV_TWI_INSTANCE(TWI_INSTANCE_ID);
+
+void twi_handler(nrf_drv_twi_evt_t const * p_event, void * p_context)
+{
+    switch (p_event->type)
+    {
+        case NRF_DRV_TWI_EVT_DONE:
+            if (p_event->xfer_desc.type == NRF_DRV_TWI_XFER_RX)
+            {
+            //    data_handler(m_sample);
+            }
+            //m_xfer_done = true;
+            break;
+        default:
+            break;
+    }
+}
 
 
+
+void twi_init (void)
+{
+    ret_code_t err_code;
+
+    const nrf_drv_twi_config_t twi_lm75b_config = {
+       .scl                = 10,
+       .sda                = 11,
+       .frequency          = NRF_DRV_TWI_FREQ_100K,
+       .interrupt_priority = APP_IRQ_PRIORITY_HIGH,
+       .clear_bus_init     = false
+    };
+
+    err_code = nrf_drv_twi_init(&m_twi, &twi_lm75b_config, twi_handler, NULL);
+    APP_ERROR_CHECK(err_code);
+
+    nrf_drv_twi_enable(&m_twi);
+}
 
 
 
 void notify_thread(void *p){
   ws2812_spi_init();
   int32_t count =0 ;
-  uint8_t i=9;
-  uint8_t j=18;
-  uint8_t k=27;
+  uint8_t i=5;
+  uint8_t j=10;
+  uint8_t k=15;
+  uint8_t m=15;
   uint8_t dir_i=1;
    uint8_t dir_j=1;
     uint8_t dir_k=1;
+    uint8_t dir_m=1;
   int breath;
   for(;;){
 
-    vec[0] = 5*sin(2*3.14159/30*count);
-    vec[1] = 5*cos(2*3.14159/30*count) + 5*sin(2*3.14159/30*count);
-    vec[2] = 5*cos(2*3.14159/30*count);
+    //vec[0] = 5*sin(2*3.14159/30*count);
+    //vec[1] = 5*cos(2*3.14159/30*count) + 5*sin(2*3.14159/30*count);
+    //vec[2] = 5*cos(2*3.14159/30*count);
 
 
-    //vec_16[0] = 100*sin(2*3.14159/0.3*count);
-    //vec_16[1] = 100*cos(2*3.14159/0.7*count) + 100*sin(2*3.14159/0.3*count);
-    //vec_16[2] = 100*cos(2*3.14159/0.7*count);
+    vec_16[0] = (int16_t)100*sin(2*3.14159/0.3*count);
+    vec_16[1] = (int16_t)100*cos(2*3.14159/0.7*count) + 100*sin(2*3.14159/0.3*count);
+    vec_16[2] = (int16_t)100*cos(2*3.14159/0.7*count);
     //ble_motion_gravity_notify(&m_bmwseat,(uint8_t*)vec, sizeof(vec));
     //ble_motion_raw_notify(&m_bmwseat,(uint8_t*)vec_16, sizeof(vec_16));
     //ws281x_closeAll();
@@ -1040,25 +1080,28 @@ void notify_thread(void *p){
         //ws281x_setPixelRGB(1,0x00,0x00,(j));
         //ws281x_setPixelRGB(2,0x00,0x00,(k));
        
-            ws2812_set_buffer(0,0x00,0x00,i);
-       ws2812_set_buffer(1,0x00,0x00,((j)));
+        ws2812_set_buffer(0,0x00,0x00,i);
+        ws2812_set_buffer(1,0x00,0x00,((j)));
         ws2812_set_buffer(2,0x00,0x00,((k)));
+        ws2812_set_buffer(3,0x00,0x00,((m)));
         ws2812_show();
     }else{
         ws2812_set_buffer(0,i,0x00,0x00);
         ws2812_set_buffer(1,j,0x00,0x00);
         ws2812_set_buffer(2,k,0x00,0x00);
+        ws2812_set_buffer(3,m,0x00,0x00);
         ws2812_show();
     }
     
     
     count++;
-    if(count % 10 == 0){
-      ble_motion_gravity_notify(&m_bmwseat,(uint8_t*)vec, sizeof(vec));
+    if(count % 15 == 0){
+      ble_motion_raw_notify(&m_bmwseat,(uint8_t*)vec_16, sizeof(vec_16));
       breath++;
       i+=dir_i;
       j+=dir_j;
       k+=dir_k;
+      m+=dir_m;
       if(i==0x25){
         dir_i=-1;
       }
@@ -1078,6 +1121,14 @@ void notify_thread(void *p){
       }
       if(k==0x00){
         dir_k=1;
+      }
+
+
+        if(m==0x25){
+        dir_m=-1;
+      }
+      if(k==0x00){
+        dir_m=1;
       }
 
     }

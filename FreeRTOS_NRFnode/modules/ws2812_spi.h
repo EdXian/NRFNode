@@ -7,7 +7,7 @@
 #define SPI_BIT_RATE 1  //1MHZ
 #define WLED_NUM 3
 #define WS2812_BUFFER_SIZE  (9*WLED_NUM) // 9*N
-#define PIXEL_NUM 3
+#define PIXEL_NUM 4
 #define WS_HIGH 0XF8
 #define WS_LOW  0XE0
 

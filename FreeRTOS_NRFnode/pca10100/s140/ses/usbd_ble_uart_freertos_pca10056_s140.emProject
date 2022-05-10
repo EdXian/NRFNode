@@ -114,6 +114,9 @@
       <file file_name="../../../../../../integration/nrfx/legacy/nrf_drv_spi.c" />
       <file file_name="../../../../../../modules/nrfx/drivers/src/nrfx_spi.c" />
       <file file_name="../../../../../../modules/nrfx/drivers/src/nrfx_spim.c" />
+      <file file_name="../../../../../../integration/nrfx/legacy/nrf_drv_twi.c" />
+      <file file_name="../../../../../../modules/nrfx/drivers/src/nrfx_twi.c" />
+      <file file_name="../../../../../../modules/nrfx/drivers/src/nrfx_twim.c" />
     </folder>
     <folder Name="Board Support">
       <file file_name="../../../../../../components/libraries/bsp/bsp.c" />
