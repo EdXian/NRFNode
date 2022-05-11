@@ -12,6 +12,7 @@ void twi_handler(nrf_drv_twi_evt_t const * p_event, void * p_context)
             if (p_event->xfer_desc.type == NRF_DRV_TWI_XFER_RX)
             {
                 //data_handler(m_sample);
+                
             }
             m_xfer_done = true;
             break;
@@ -99,16 +100,95 @@ void imu_init(){
 
     nrf_drv_twi_enable(&m_twi);
 
-    imu_probe();
+   bmp085_enable();
+  adxl345_enable();
+}
+
+
+void bmp085_enable(){
+  uint8_t err_code;
+  uint8_t data[1]={0xf4};
+  err_code = twi_write_reg(0x77,0xf4 ,data, 1 );
+  
+  if(err_code!=true){
+    while(1);
+  }
+}
+
+uint8_t adxl345_id;
+uint8_t BW_RATE;
+uint8_t PWR_CTRL;
+void adxl345_enable(){
+
+   uint8_t err_code;
+  uint8_t data[1]={0x0};
+  err_code = twi_read_reg(0x53,0x00 ,&adxl345_id, 1 );
+  
+  if(err_code!=true){
+    while(1);
+  }
+
+
+    err_code = twi_read_reg(0x53,0x2c ,&BW_RATE, 1 );
+  
+  if(err_code!=true){
+    while(1);
+  }
+  
+
+      err_code = twi_read_reg(0x53,0x2D ,&PWR_CTRL, 1 );
+      PWR_CTRL |= (1<<3);
+
+
+    twi_write_reg(0x53, 0x2D,&PWR_CTRL,1);
+
+
+     err_code = twi_read_reg(0x53,0x2D ,&PWR_CTRL, 1 );
+
+
+  if(err_code!=true){
+    while(1);
+  }
 
 }
+
+uint8_t axis[6];   // 32 33 34 35 36 37
+static adxl345_acc_t adxl345_acc;
+
+adxl345_acc_t adxl345_get_axis(){
+
+  uint8_t err_code;
+  err_code = twi_read_reg(0x53,0x32 ,axis,6 );
+  //return ((int16_t)(axis[0])&0x00ff + (int16_t)(axis[1]<<8));
+
+  adxl345_acc.x = ((int16_t)axis[0]) + (((int16_t)axis[1])<<8);
+  adxl345_acc.y = ((int16_t)axis[2]) + (((int16_t)axis[3])<<8);
+  adxl345_acc.z = ((int16_t)axis[4]) + (((int16_t)axis[5])<<8);
+
+  return adxl345_acc;
+}
+
+
+
+
+static uint8_t bmp085_pressure[2];
+
+int16_t bmp085_read(){
+  //uint8_t data[2]={};
+  twi_read_reg(0x77,0xf6,bmp085_pressure,2);
+  return (bmp085_pressure[0] + bmp085_pressure[1]<<8);
+}
+
+
+
 
 
 void imu_probe(){
   uint8_t err_code;
-  uint8_t data[2]={0xf4,0xf4};
-  err_code = twi_write_reg(&m_twi, 0x77,data, 2 );
-  if(err_code!=0){
+  uint8_t data[1]={0xf4};
+  err_code = twi_write_reg(0x77,0xf4 ,data, 1 );
+  
+  if(err_code!=true){
     while(1);
   }
 

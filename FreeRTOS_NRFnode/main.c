@@ -1017,7 +1017,9 @@ float vec[3];
 
 int16_t vec_16[9]={0};
 
+adxl345_acc_t adxl345_acc;
 
+    int16_t pressure;
 void notify_thread(void *p){
   ws2812_spi_init();
   int32_t count =0 ;
@@ -1029,6 +1031,7 @@ void notify_thread(void *p){
    uint8_t dir_j=1;
     uint8_t dir_k=1;
     uint8_t dir_m=1;
+
   int breath;
   imu_init();
   for(;;){
@@ -1038,9 +1041,9 @@ void notify_thread(void *p){
     //vec[2] = 5*cos(2*3.14159/30*count);
 
 
-    vec_16[0] = (int16_t)100*sin(2*3.14159/0.3*count);
-    vec_16[1] = (int16_t)100*cos(2*3.14159/0.7*count) + 100*sin(2*3.14159/0.3*count);
-    vec_16[2] = (int16_t)100*cos(2*3.14159/0.7*count);
+    vec_16[0] = adxl345_acc.x ; //(int16_t)100*sin(2*3.14159/0.3*count);
+    vec_16[1] = adxl345_acc.y ; //(int16_t)100*cos(2*3.14159/0.7*count) + 100*sin(2*3.14159/0.3*count);
+    vec_16[2] = adxl345_acc.z ; //(int16_t)100*cos(2*3.14159/0.7*count);
     //ble_motion_gravity_notify(&m_bmwseat,(uint8_t*)vec, sizeof(vec));
     //ble_motion_raw_notify(&m_bmwseat,(uint8_t*)vec_16, sizeof(vec_16));
     //ws281x_closeAll();
@@ -1100,7 +1103,13 @@ void notify_thread(void *p){
       if(k==0x00){
         dir_m=1;
       }
+      //pressure = bmp085_read();
 
+      adxl345_acc = adxl345_get_axis();
+
+
+
+      asm("nop");
     }
     //drive_wled(3);
     vTaskDelay(2);
