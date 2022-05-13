@@ -1119,7 +1119,7 @@ void notify_thread(void *p){
 
 /** @brief Application main function. */
 int main(void)
-{
+ {
     ret_code_t ret;
     // Initialize.
     log_init();
@@ -1134,18 +1134,18 @@ int main(void)
     ret = nrf_drv_clock_init();
     APP_ERROR_CHECK(ret);
 
-//#if NRF_LOG_ENABLED
-//    // Start execution.
-//    if (pdPASS != xTaskCreate(logger_thread,
-//                              "LOGGER",
-//                              LOGGER_STACK_SIZE,
-//                              NULL,
-//                              LOGGER_PRIORITY,
-//                              &m_logger_thread))
-//    {
-//        APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
-//    }
-//#endif
+#if NRF_LOG_ENABLED
+    // Start execution.
+    if (pdPASS != xTaskCreate(logger_thread,
+                              "LOGGER",
+                              LOGGER_STACK_SIZE,
+                              NULL,
+                              LOGGER_PRIORITY,
+                              &m_logger_thread))
+    {
+        APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
+    }
+#endif
 
 
  if (pdPASS != xTaskCreate(usbd_thread,
