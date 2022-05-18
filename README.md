@@ -47,6 +47,12 @@ MDBT50Q  nRF52833
 
 ![](images/nrfnode.png)
 
+機構組合圖
+
+![](images/mechanism.png)
+
+
+
 
 
 輸出入介面:
