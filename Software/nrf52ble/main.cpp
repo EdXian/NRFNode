@@ -68,10 +68,10 @@
 #include <sys/time.h>
 #include <ctime>
 
-#include "tcpsocket.h"
+//#include "tcpsocket.h"
 
 int listenfd = 0, connfd = 0;
-struct sockaddr_in serv_addr;
+//struct sockaddr_in serv_addr;
 
 char sendBuff[1025];
 time_t ticks;
@@ -117,17 +117,24 @@ enum
 #define SLAVE_LATENCY                   0                                /**< Slave Latency in number of connection events. */
 #define CONNECTION_SUPERVISION_TIMEOUT  MSEC_TO_UNITS(4000, UNIT_10_MS)  /**< Determines supervision time-out in units of 10 milliseconds. */
 
-#define TARGET_DEV_NAME                 "Thingy"                  /**< Connect to a peripheral using a given advertising name here. */
+#define TARGET_DEV_NAME                 "NRFNode"                  /**< Connect to a peripheral using a given advertising name here. */
 #define MAX_PEER_COUNT                  1                                /**< Maximum number of peer's application intends to manage. */
 
+//TX Characteristic (6E400003-B5A3-F393-E0A9-E50E24DCCA9E)
+//EF68xxxx-9B35-4933-9B10-52FFA9740042
+/*
+#define LBS_UUID_BASE   \
+{{0x9E, 0xCA, 0xDC, 0x24, 0x0E, 0xE5, 0xA9, 0xE0, 0x93, 0xF3, 0xA3, 0xB5, 0x00, 0x00, 0x40, 0x6E}}
+*/
 
-#define LBS_UUID_BASE   {{0x42, 0x00, 0x74, 0xA9, 0xFF, 0x52, 0x10, 0x9B, 0x33, 0x49, 0x35, 0x9B, 0x00, 0x00, 0x68, 0xEF}}
+#define LBS_UUID_BASE \
+{{0x42, 0x00, 0x74, 0xA9, 0xFF, 0x52, 0x10, 0x9B, 0x33, 0x49, 0x35, 0x9B, 0x00, 0x00, 0x68, 0xEF}}
 
-
-
+//0001
+//0003
 #define ENV_UUID_SERVICVE     0x0400
 #define ENV_UUID_BARO_CHAR    0x0406
-#define LBS_UUID_LED_CHAR     0x0101
+#define LBS_UUID_LED_CHAR     0x0000
 
 #define BLE_UUID_CCCD                        0x2902
 #define BLE_CCCD_NOTIFY                      0x01
@@ -603,7 +610,7 @@ static uint32_t descr_discovery_start()
 static uint32_t button_state_cccd_set(uint8_t value)
 {
     ble_gattc_write_params_t write_params;
-    uint8_t                  cccd_value[2] = {value, 0};
+    uint8_t                  cccd_value[2] = {0x01, 0};
 
     if (m_button_state_cccd_handle == 0)
     {
@@ -894,12 +901,13 @@ static void on_descriptor_discovery_response(const ble_gattc_evt_t * const p_ble
         if (p_ble_gattc_evt->params.desc_disc_rsp.descs[i].uuid.uuid == BLE_UUID_CCCD)
         {
             m_button_state_cccd_handle = p_ble_gattc_evt->params.desc_disc_rsp.descs[i].handle;
-            printf("notify found\n");
+            printf("notify found 2902\n");
             fflush(stdout);
         }
         else if (p_ble_gattc_evt->params.desc_disc_rsp.descs[i].uuid.uuid == ENV_UUID_BARO_CHAR)
         {
             m_button_state_char_handle = p_ble_gattc_evt->params.desc_disc_rsp.descs[i].handle;
+            printf("bind 0x03\n");
         }
 //        else if (p_ble_gattc_evt->params.desc_disc_rsp.descs[i].uuid.uuid == LBS_UUID_LED_CHAR)
 //        {
@@ -910,8 +918,10 @@ static void on_descriptor_discovery_response(const ble_gattc_evt_t * const p_ble
         else if (p_ble_gattc_evt->params.desc_disc_rsp.descs[i].uuid.uuid == 0x2803)
         {
             char_discovery_start();
+            printf("find 2803\n");
             return;
         }
+         //descr_discovery_start();
 
     }
     descr_discovery_start();
@@ -966,7 +976,7 @@ static void on_hvx(const ble_gattc_evt_t * const p_ble_gattc_evt)
         acc_x = (int16_t*)&data[0];
         acc_y = (int16_t*)&data[2];
         acc_z = (int16_t*)&data[4];
-        tcpscoket_send(data,len);
+        //tcpscoket_send(data,len);
         //printf("Seconds since January 1, 1970 = %ld\n", seconds);
 
         printf("( %ld ) raw: %d %d %d, %d\n",millisec_since_epoch ,*acc_x,*acc_y,*acc_z, len);
@@ -1139,7 +1149,7 @@ int main(int argc, char * argv[])
     uint8_t  led_state = 0;
 
 
-    tcpsocket_init();
+    //tcpsocket_init();
 
     if (argc > 1)
     {

@@ -375,15 +375,15 @@ static void info_service_evt_handler(ble_info_service_t *p_info_service,
 ret_code_t err;
 static void services_init(void)
 {
-    //uint32_t       err_code;
-    //ble_nus_init_t nus_init;
+    uint32_t       err_code;
+    ble_nus_init_t nus_init;
 
-    //memset(&nus_init, 0, sizeof(nus_init));
+    memset(&nus_init, 0, sizeof(nus_init));
 
-    //nus_init.data_handler = nus_data_handler;
+    nus_init.data_handler = nus_data_handler;
 
-    //err_code = ble_nus_init(&m_nus, &nus_init);
-    //APP_ERROR_CHECK(err_code);
+    err_code = ble_nus_init(&m_nus, &nus_init);
+    APP_ERROR_CHECK(err_code);
       
       nrf_ble_qwr_init_t qwr_init = {0};
   
@@ -1019,7 +1019,8 @@ int16_t vec_16[9]={0};
 
 adxl345_acc_t adxl345_acc;
 
-    int16_t pressure;
+
+int16_t pressure;
 void notify_thread(void *p){
   ws2812_spi_init();
   int32_t count =0 ;
@@ -1033,17 +1034,22 @@ void notify_thread(void *p){
     uint8_t dir_m=1;
 
   int breath;
-  imu_init();
+  int length;
+  //imu_init();
   for(;;){
 
     //vec[0] = 5*sin(2*3.14159/30*count);
     //vec[1] = 5*cos(2*3.14159/30*count) + 5*sin(2*3.14159/30*count);
     //vec[2] = 5*cos(2*3.14159/30*count);
 
+    vec_16[0] = (int16_t)100*sin(2*3.14159/0.3*count);
+    vec_16[1] = (int16_t)100*cos(2*3.14159/0.7*count) + 100*sin(2*3.14159/0.3*count);
+    vec_16[2] = (int16_t)100*cos(2*3.14159/0.7*count);
 
-    vec_16[0] = adxl345_acc.x ; //(int16_t)100*sin(2*3.14159/0.3*count);
-    vec_16[1] = adxl345_acc.y ; //(int16_t)100*cos(2*3.14159/0.7*count) + 100*sin(2*3.14159/0.3*count);
-    vec_16[2] = adxl345_acc.z ; //(int16_t)100*cos(2*3.14159/0.7*count);
+
+    //vec_16[0] = adxl345_acc.x ; //(int16_t)100*sin(2*3.14159/0.3*count);
+    //vec_16[1] = adxl345_acc.y ; //(int16_t)100*cos(2*3.14159/0.7*count) + 100*sin(2*3.14159/0.3*count);
+    //vec_16[2] = adxl345_acc.z ; //(int16_t)100*cos(2*3.14159/0.7*count);
     //ble_motion_gravity_notify(&m_bmwseat,(uint8_t*)vec, sizeof(vec));
     //ble_motion_raw_notify(&m_bmwseat,(uint8_t*)vec_16, sizeof(vec_16));
     //ws281x_closeAll();
@@ -1065,10 +1071,14 @@ void notify_thread(void *p){
         ws2812_set_buffer(3,m,0x00,0x00);
         ws2812_show();
     }
-    
-    
+
     count++;
     if(count % 15 == 0){
+        length = 6;
+    ble_nus_data_send(&m_nus,
+                        (uint8_t *)vec_16 ,
+                        &length,
+                        m_conn_handle);
       ble_motion_raw_notify(&m_bmwseat,(uint8_t*)vec_16, sizeof(vec_16));
       breath++;
       i+=dir_i;
@@ -1105,7 +1115,7 @@ void notify_thread(void *p){
       }
       //pressure = bmp085_read();
 
-      adxl345_acc = adxl345_get_axis();
+     // adxl345_acc = adxl345_get_axis();
 
 
 
@@ -1147,7 +1157,7 @@ int main(void)
     }
 #endif
 
-/*
+
  if (pdPASS != xTaskCreate(usbd_thread,
                             "usbd",
                             USBD_STACK_SIZE,
@@ -1158,7 +1168,7 @@ int main(void)
         APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
     }
     NRF_LOG_INFO("USBD BLE UART example started.");
-*/
+
 
 
  if (pdPASS != xTaskCreate(notify_thread,
