@@ -1033,14 +1033,18 @@ void notify_thread(void *p){
     uint8_t dir_m=1;
 
   int breath;
-  imu_init();
+
+
+
+
+
   for(;;){
 
     //vec[0] = 5*sin(2*3.14159/30*count);
     //vec[1] = 5*cos(2*3.14159/30*count) + 5*sin(2*3.14159/30*count);
     //vec[2] = 5*cos(2*3.14159/30*count);
 
-
+   // imu_gpio_init();
     vec_16[0] = adxl345_acc.x ; //(int16_t)100*sin(2*3.14159/0.3*count);
     vec_16[1] = adxl345_acc.y ; //(int16_t)100*cos(2*3.14159/0.7*count) + 100*sin(2*3.14159/0.3*count);
     vec_16[2] = adxl345_acc.z ; //(int16_t)100*cos(2*3.14159/0.7*count);
@@ -1048,6 +1052,7 @@ void notify_thread(void *p){
     //ble_motion_raw_notify(&m_bmwseat,(uint8_t*)vec_16, sizeof(vec_16));
     //ws281x_closeAll();
     //ws281x_setPixelColor(0,0x00040404);
+ 
     if(ble_is_connected){
         //ws281x_setPixelRGB(0,0x00,0x00,i);
         //ws281x_setPixelRGB(1,0x00,0x00,(j));
@@ -1066,6 +1071,10 @@ void notify_thread(void *p){
         ws2812_show();
     }
     
+
+    //select_imu(11);
+    //adxl345_acc = adxl345_get_axis();
+
     
     count++;
     if(count % 15 == 0){
@@ -1105,10 +1114,12 @@ void notify_thread(void *p){
       }
       //pressure = bmp085_read();
 
-      adxl345_acc = adxl345_get_axis();
+     // adxl345_acc = adxl345_get_axis();
 
 
-
+      //imu_flush();
+      //imu_flip();
+      //imu_flop();
       asm("nop");
     }
     //drive_wled(3);
@@ -1116,6 +1127,46 @@ void notify_thread(void *p){
   }
 }
 
+
+
+void data_process(){
+//     imu_flush();
+//   imu_flip();
+//   imu_flop();
+//imu_flop();
+
+uint8_t i=1;
+ imu_gpio_init();
+ nrf_gpio_pin_clear(CLK);
+nrf_gpio_pin_clear(SAB);
+nrf_gpio_pin_toggle(CLK);
+nrf_gpio_pin_toggle(CLK);
+nrf_gpio_pin_toggle(CLK);
+nrf_gpio_pin_toggle(CLK);
+nrf_gpio_pin_toggle(CLK);
+  imu_init();
+  adxl345_enable();
+  while(1){
+  
+    //imu_flush();
+    //imu_flip();
+    //imu_flop();
+    //nrf_gpio_pin_toggle(SAB);
+    
+    //nrf_gpio_pin_set(CLK);
+
+    adxl345_acc = adxl345_get_axis();
+    //if(i%12==0){
+    //  i=1;
+    //}
+    //select_imu(i);
+
+    i++;
+    vTaskDelay(20);
+  
+  }
+
+}
 
 /** @brief Application main function. */
 int main(void)
@@ -1170,6 +1221,23 @@ int main(void)
     {
         APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
     }
+
+
+     if (pdPASS != xTaskCreate(data_process,
+                            "process",
+                            USBD_STACK_SIZE,
+                              NULL,
+                              USBD_PRIORITY-1,
+                              NULL))
+    {
+        APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
+    }
+
+
+
+
+
+
     NRF_LOG_INFO("USBD BLE UART example started.");
     nrf_gpio_cfg_output(WLED_GPIO);
     ble_stack_init();
