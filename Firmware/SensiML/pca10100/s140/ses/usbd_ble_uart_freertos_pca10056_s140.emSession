@@ -1,0 +1,105 @@
+<!DOCTYPE CrossStudio_Session_File>
+<session>
+ <Bookmarks/>
+ <Breakpoints groups="Breakpoints" active_group="Breakpoints">
+  <BreakpointListItem trigger="" line="187" counter="0" hardwareBreakpoint="" isFunctionBreakpoint="false" action="" expression="" group="Breakpoints" type="Breakpoint" state="4" filename="../../../modules/imu.c" useHWbreakpoint="false"/>
+  <BreakpointListItem trigger="" line="194" counter="0" hardwareBreakpoint="" isFunctionBreakpoint="false" action="" expression="" group="Breakpoints" type="Breakpoint" state="4" filename="../../../modules/imu.c" useHWbreakpoint="false"/>
+  <BreakpointListItem trigger="" line="1076" counter="0" hardwareBreakpoint="" isFunctionBreakpoint="false" action="" expression="" group="Breakpoints" type="Breakpoint" state="2" filename="../../../main.c" useHWbreakpoint="false"/>
+  <Exceptions set="MemManage;UsageFault_Coprocessor;UsageFault_CheckingError;UsageFault_StateError;BusFault;ExceptionEntryReturnFault;HardFault"/>
+ </Breakpoints>
+ <ExecutionProfileWindow/>
+ <FrameBufferWindow>
+  <FrameBufferWindow bufferHeight="-1" addressSpace="" addressText="" bufferWidth="-1"/>
+ </FrameBufferWindow>
+ <Memory1>
+  <MemoryWindow addressSpace="" dataSize="1" autoEvaluate="0" viewMode="0" addressOrder="0" columnsText="" refreshPeriod="0" name="usbd_ble_uart_freertos_pca10056_s140" radix="16" sizeText="" addressText=""/>
+ </Memory1>
+ <Memory2>
+  <MemoryWindow addressSpace="" dataSize="1" autoEvaluate="0" viewMode="0" addressOrder="0" columnsText="" refreshPeriod="0" name="usbd_ble_uart_freertos_pca10056_s140" radix="16" sizeText="" addressText=""/>
+ </Memory2>
+ <Memory3>
+  <MemoryWindow addressSpace="" dataSize="1" autoEvaluate="0" viewMode="0" addressOrder="0" columnsText="" refreshPeriod="0" name="usbd_ble_uart_freertos_pca10056_s140" radix="16" sizeText="" addressText=""/>
+ </Memory3>
+ <Memory4>
+  <MemoryWindow addressSpace="" dataSize="1" autoEvaluate="0" viewMode="0" addressOrder="0" columnsText="" refreshPeriod="0" name="usbd_ble_uart_freertos_pca10056_s140" radix="16" sizeText="" addressText=""/>
+ </Memory4>
+ <Project>
+  <ProjectSessionItem path="usbd_ble_uart_freertos_pca10056_s140"/>
+  <ProjectSessionItem path="usbd_ble_uart_freertos_pca10056_s140;usbd_ble_uart_freertos_pca10056_s140"/>
+  <ProjectSessionItem path="usbd_ble_uart_freertos_pca10056_s140;usbd_ble_uart_freertos_pca10056_s140;Application"/>
+  <ProjectSessionItem path="usbd_ble_uart_freertos_pca10056_s140;usbd_ble_uart_freertos_pca10056_s140;Board Definition"/>
+  <ProjectSessionItem path="usbd_ble_uart_freertos_pca10056_s140;usbd_ble_uart_freertos_pca10056_s140;modules"/>
+  <ProjectSessionItem path="usbd_ble_uart_freertos_pca10056_s140;usbd_ble_uart_freertos_pca10056_s140;nRF_Libraries"/>
+  <ProjectSessionItem path="usbd_ble_uart_freertos_pca10056_s140;usbd_ble_uart_freertos_pca10056_s140;Third Parties"/>
+ </Project>
+ <Register1>
+  <RegisterWindow visibleNodes="CPU - Current Context/r0;CPU - Current Context/r1;CPU - Current Context/r2;CPU - Current Context/r3;CPU - Current Context/r4;CPU - Current Context/r5;CPU - Current Context/r6;CPU - Current Context/r7;CPU - Current Context/r8;CPU - Current Context/r9;CPU - Current Context/r10;CPU - Current Context/r11;CPU - Current Context/r12;CPU - Current Context/sp(r13);CPU - Current Context/lr(r14);CPU - Current Context/pc(r15);CPU - Current Context/apsr;CPU/r0;CPU/r1;CPU/r2;CPU/r3;CPU/r4;CPU/r5;CPU/r6;CPU/r7;CPU/r8;CPU/r9;CPU/r10;CPU/r11;CPU/r12;CPU/sp(r13);CPU/lr(r14);CPU/pc(r15);CPU/xpsr;CPU/MSP;CPU/PSP;CPU/PRIMASK;CPU/BASEPRI;CPU/FAULTMASK;CPU/CONTROL;CPU/internal" binaryNodes="" asciiNodes="" openNodes="CPU - Current Context" name="usbd_ble_uart_freertos_pca10056_s140" decimalNodes="" octalNodes="" unsignedNodes=""/>
+ </Register1>
+ <Register2>
+  <RegisterWindow visibleNodes="CPU - Current Context/r0;CPU - Current Context/r1;CPU - Current Context/r2;CPU - Current Context/r3;CPU - Current Context/r4;CPU - Current Context/r5;CPU - Current Context/r6;CPU - Current Context/r7;CPU - Current Context/r8;CPU - Current Context/r9;CPU - Current Context/r10;CPU - Current Context/r11;CPU - Current Context/r12;CPU - Current Context/sp(r13);CPU - Current Context/lr(r14);CPU - Current Context/pc(r15);CPU - Current Context/apsr;CPU/r0;CPU/r1;CPU/r2;CPU/r3;CPU/r4;CPU/r5;CPU/r6;CPU/r7;CPU/r8;CPU/r9;CPU/r10;CPU/r11;CPU/r12;CPU/sp(r13);CPU/lr(r14);CPU/pc(r15);CPU/xpsr;CPU/MSP;CPU/PSP;CPU/PRIMASK;CPU/BASEPRI;CPU/FAULTMASK;CPU/CONTROL;CPU/internal" binaryNodes="" asciiNodes="" openNodes="CPU - Current Context" name="usbd_ble_uart_freertos_pca10056_s140" decimalNodes="" octalNodes="" unsignedNodes=""/>
+ </Register2>
+ <Register3>
+  <RegisterWindow visibleNodes="CPU - Current Context/r0;CPU - Current Context/r1;CPU - Current Context/r2;CPU - Current Context/r3;CPU - Current Context/r4;CPU - Current Context/r5;CPU - Current Context/r6;CPU - Current Context/r7;CPU - Current Context/r8;CPU - Current Context/r9;CPU - Current Context/r10;CPU - Current Context/r11;CPU - Current Context/r12;CPU - Current Context/sp(r13);CPU - Current Context/lr(r14);CPU - Current Context/pc(r15);CPU - Current Context/apsr;CPU/r0;CPU/r1;CPU/r2;CPU/r3;CPU/r4;CPU/r5;CPU/r6;CPU/r7;CPU/r8;CPU/r9;CPU/r10;CPU/r11;CPU/r12;CPU/sp(r13);CPU/lr(r14);CPU/pc(r15);CPU/xpsr;CPU/MSP;CPU/PSP;CPU/PRIMASK;CPU/BASEPRI;CPU/FAULTMASK;CPU/CONTROL;CPU/internal" binaryNodes="" asciiNodes="" openNodes="CPU - Current Context" name="usbd_ble_uart_freertos_pca10056_s140" decimalNodes="" octalNodes="" unsignedNodes=""/>
+ </Register3>
+ <Register4>
+  <RegisterWindow visibleNodes="CPU - Current Context/r0;CPU - Current Context/r1;CPU - Current Context/r2;CPU - Current Context/r3;CPU - Current Context/r4;CPU - Current Context/r5;CPU - Current Context/r6;CPU - Current Context/r7;CPU - Current Context/r8;CPU - Current Context/r9;CPU - Current Context/r10;CPU - Current Context/r11;CPU - Current Context/r12;CPU - Current Context/sp(r13);CPU - Current Context/lr(r14);CPU - Current Context/pc(r15);CPU - Current Context/apsr;CPU/r0;CPU/r1;CPU/r2;CPU/r3;CPU/r4;CPU/r5;CPU/r6;CPU/r7;CPU/r8;CPU/r9;CPU/r10;CPU/r11;CPU/r12;CPU/sp(r13);CPU/lr(r14);CPU/pc(r15);CPU/xpsr;CPU/MSP;CPU/PSP;CPU/PRIMASK;CPU/BASEPRI;CPU/FAULTMASK;CPU/CONTROL;CPU/internal" binaryNodes="" asciiNodes="" openNodes="CPU - Current Context" name="usbd_ble_uart_freertos_pca10056_s140" decimalNodes="" octalNodes="" unsignedNodes=""/>
+ </Register4>
+ <Threads>
+  <ThreadsWindow showLists=""/>
+ </Threads>
+ <TraceWindow>
+  <Trace enabled="Yes"/>
+ </TraceWindow>
+ <Watch1>
+  <Watches active="1" update="Never">
+   <Watchpoint expression="err_code" name="err_code" radix="16" linenumber="364" filename="../../../main.c"/>
+   <Watchpoint expression="pressure" name="pressure" radix="-1" linenumber="1115" filename="../../../main.c"/>
+   <Watchpoint expression="adxl345_id" name="adxl345_id" radix="-1" linenumber="161" filename="../../../modules/imu.c"/>
+   <Watchpoint expression="BW_RATE" name="BW_RATE" radix="-1" linenumber="156" filename="../../../modules/imu.c"/>
+   <Watchpoint expression="PWR_CTRL" name="PWR_CTRL" radix="-1" linenumber="188" filename="../../../modules/imu.c"/>
+   <Watchpoint expression="xaxis" name="xaxis" radix="16" linenumber="204" filename="../../../modules/imu.c"/>
+   <Watchpoint expression="axis" name="axis" radix="-1" linenumber="204" filename="../../../modules/imu.c"/>
+   <Watchpoint expression="adxl345_acc" name="adxl345_acc" radix="10" linenumber="1112" filename="../../../main.c"/>
+  </Watches>
+ </Watch1>
+ <Watch2>
+  <Watches active="0" update="Never"/>
+ </Watch2>
+ <Watch3>
+  <Watches active="0" update="Never"/>
+ </Watch3>
+ <Watch4>
+  <Watches active="0" update="Never"/>
+ </Watch4>
+ <Files>
+  <SessionOpenFile windowGroup="DockEditLeft" x="1" y="7894" useTextEdit="1" openedFrom="D:/DeviceDownload/nRF5_SDK_17.1.0_ddde560/nRF5_SDK_17.1.0_ddde560/examples/peripheral/FreeRTOS_NRFnode/main.c" useBinaryEdit="0" left="0" path="../config/sdk_config.h" selected="0" top="7876" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="1075" useTextEdit="1" openedFrom="" useBinaryEdit="0" left="0" path="../../../main.c" selected="0" top="1061" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="213" useTextEdit="1" openedFrom="" useBinaryEdit="0" left="0" path="../../../../../../external/freertos/portable/CMSIS/nrf52/port_cmsis_systick.c" selected="0" top="198" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="99" useTextEdit="1" openedFrom="" useBinaryEdit="0" left="0" path="../../../../../../components/libraries/util/app_error_weak.c" selected="1" top="85" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="34" y="40" useTextEdit="1" openedFrom="" useBinaryEdit="0" left="0" path="../../../../../../components/ble/nrf_ble_qwr/nrf_ble_qwr.c" selected="0" top="12" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="4" y="87" useTextEdit="1" openedFrom="D:/DeviceDownload/nRF5_SDK_17.1.0_ddde560/nRF5_SDK_17.1.0_ddde560/examples/peripheral/FreeRTOS_NRFnode/main.c" useBinaryEdit="0" left="0" path="../../../../../../components/ble/ble_advertising/ble_advertising.h" selected="0" top="82" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="0" useTextEdit="1" openedFrom="D:/DeviceDownload/nRF5_SDK_17.1.0_ddde560/nRF5_SDK_17.1.0_ddde560/examples/peripheral/FreeRTOS_NRFnode/service/motion_service.c" useBinaryEdit="0" left="0" path="../../../../../../external/freertos/source/include/FreeRTOS.h" selected="0" top="0" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="41" y="51" useTextEdit="1" openedFrom="" useBinaryEdit="0" left="0" path="../../../service/motion_service.h" selected="0" top="38" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="2" y="705" useTextEdit="1" openedFrom="D:/DeviceDownload/nRF5_SDK_17.1.0_ddde560/nRF5_SDK_17.1.0_ddde560/examples/peripheral/FreeRTOS_NRFnode/main.c" useBinaryEdit="0" left="0" path="../../../service/motion_service.c" selected="0" top="740" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="0" useTextEdit="1" openedFrom="D:/DeviceDownload/nRF5_SDK_17.1.0_ddde560/nRF5_SDK_17.1.0_ddde560/examples/peripheral/FreeRTOS_NRFnode/main.c" useBinaryEdit="0" left="0" path="../../../../../../components/libraries/usbd/app_usbd_serial_num.h" selected="0" top="38" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="50" y="22" useTextEdit="1" openedFrom="D:/DeviceDownload/nRF5_SDK_17.1.0_ddde560/nRF5_SDK_17.1.0_ddde560/examples/peripheral/FreeRTOS_NRFnode/main.c" useBinaryEdit="0" left="0" path="../../../../../../components/libraries/usbd/app_usbd_string_desc.h" selected="0" top="0" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="8" y="203" useTextEdit="1" openedFrom="/home/biologue/DeviceDownload/nRF5_SDK_17.1.0_ddde560/examples/peripheral/FreeRTOS_NRFnode/main.c" useBinaryEdit="0" left="0" path="../../../../../../components/boards/boards.h" selected="0" top="0" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="21" y="120" useTextEdit="1" openedFrom="/home/biologue/DeviceDownload/nRF5_SDK_17.1.0_ddde560/examples/peripheral/FreeRTOS_NRFnode/main.c" useBinaryEdit="0" left="0" path="../../../modules/ws2812_spi.c" selected="0" top="0" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="19" y="9" useTextEdit="1" openedFrom="/home/biologue/DeviceDownload/nRF5_SDK_17.1.0_ddde560/examples/peripheral/FreeRTOS_NRFnode/modules/ws2812_spi.c" useBinaryEdit="0" left="0" path="../../../modules/ws2812_spi.h" selected="0" top="0" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="8" y="61" useTextEdit="1" openedFrom="/home/edxian/DeviceDownload/nRF5_SDK_17.1.0_ddde560/examples/peripheral/FreeRTOS_NRFnode/modules/ws2812_spi.c" useBinaryEdit="0" left="0" path="../../../../../../modules/nrfx/hal/nrf_spi.h" selected="0" top="41" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="64" y="99" useTextEdit="1" openedFrom="/home/edxian/DeviceDownload/nRF5_SDK_17.1.0_ddde560/examples/peripheral/FreeRTOS_NRFnode/modules/ws2812_spi.c" useBinaryEdit="0" left="0" path="../../../../../../integration/nrfx/legacy/nrf_drv_spi.c" selected="0" top="99" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="29" y="454" useTextEdit="1" openedFrom="/home/edxian/DeviceDownload/nRF5_SDK_17.1.0_ddde560/examples/peripheral/FreeRTOS_NRFnode/modules/ws2812_spi.c" useBinaryEdit="0" left="0" path="../../../../../../integration/nrfx/legacy/nrf_drv_spi.h" selected="0" top="448" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="26" y="82" useTextEdit="1" openedFrom="" useBinaryEdit="0" left="0" path="../../../../../../modules/nrfx/drivers/src/nrfx_spi.c" selected="0" top="62" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="34" y="522" useTextEdit="1" openedFrom="" useBinaryEdit="0" left="0" path="../../../../../../modules/nrfx/drivers/src/nrfx_spim.c" selected="0" top="470" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="32" y="147" useTextEdit="1" openedFrom="/home/edxian/DeviceDownload/nRF5_SDK_17.1.0_ddde560/examples/peripheral/FreeRTOS_NRFnode/modules/ws2812_spi.c" useBinaryEdit="0" left="0" path="../../../../../../modules/nrfx/drivers/include/nrfx_spim.h" selected="0" top="129" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="8" y="883" useTextEdit="1" openedFrom="/home/edxian/DeviceDownload/nRF5_SDK_17.1.0_ddde560/examples/peripheral/FreeRTOS_NRFnode/modules/ws2812_spi.c" useBinaryEdit="0" left="0" path="../../../../../../integration/nrfx/legacy/apply_old_config.h" selected="0" top="863" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="4" y="151" useTextEdit="1" openedFrom="/home/edxian/DeviceDownload/nRF5_SDK_17.1.0_ddde560/examples/peripheral/FreeRTOS_NRFnode/modules/ws2812_spi.c" useBinaryEdit="0" left="0" path="../../../../../../modules/nrfx/hal/nrf_spim.h" selected="0" top="113" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="33" y="120" useTextEdit="1" openedFrom="" useBinaryEdit="0" left="0" path="../../../../../../integration/nrfx/legacy/nrf_drv_twi.h" selected="0" top="94" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="33" y="166" useTextEdit="1" openedFrom="/home/biologue/DeviceDownload/nRF5_SDK_17.1.0_ddde560/examples/peripheral/FreeRTOS_NRFnode/main.c" useBinaryEdit="0" left="0" path="../../../modules/imu.c" selected="0" top="111" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="22" y="29" useTextEdit="1" openedFrom="/home/biologue/DeviceDownload/nRF5_SDK_17.1.0_ddde560/examples/peripheral/FreeRTOS_NRFnode/main.c" useBinaryEdit="0" left="0" path="../../../modules/imu.h" selected="0" top="11" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="37" y="648" useTextEdit="1" openedFrom="/home/biologue/DeviceDownload/nRF5_SDK_17.1.0_ddde560/examples/peripheral/FreeRTOS_NRFnode/modules/imu.c" useBinaryEdit="0" left="0" path="../../../../../../modules/nrfx/hal/nrf_gpio.h" selected="0" top="619" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="21" y="63" useTextEdit="1" openedFrom="/home/biologue/DeviceDownload/nRF5_SDK_17.1.0_ddde560/examples/peripheral/FreeRTOS_NRFnode/modules/imu.c" useBinaryEdit="0" left="0" path="../../../../../../components/libraries/delay/nrf_delay.h" selected="0" top="44" codecName="Default"/>
+  <SessionOpenFile windowGroup="DockEditLeft" x="0" y="375" useTextEdit="1" openedFrom="" useBinaryEdit="0" left="0" path="../../../../../../modules/nrfx/hal/nrf_rtc.h" selected="0" top="361" codecName="Default"/>
+ </Files>
+ <ARMCrossStudioWindow activeProject="usbd_ble_uart_freertos_pca10056_s140" fileDialogDefaultFilter="*.c" autoConnectTarget="J-Link" buildConfiguration="Release" sessionSettings="" debugSearchFileMap="" fileDialogInitialDirectory="/home/biologue/DeviceDownload/nRF5_SDK_17.1.0_ddde560/modules/nrfx/drivers/src" debugSearchPath="" autoConnectCapabilities="3711"/>
+</session>
