@@ -25,7 +25,7 @@
 //#define   SAB 41              //HGPIO6 SAB
 //#define  I2C_SCL   11            //HGPIO7 SCL
 //#define   I2C_SDA 8            //HGPIO4 SDA
-
+#define IMU_ADDRESS 0x6a
 #define WHO_AM_I  0x0F
 #define SENSOR_NUMS 11
 #define TWI_INSTANCE_ID          1

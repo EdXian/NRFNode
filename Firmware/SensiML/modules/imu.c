@@ -198,7 +198,7 @@ void adxl345_enable(){
   //err_code = twi_read_reg(0x53,0x00 ,&adxl345_id, 1 );  //adxl345
                                                       // lsm330
 
-  err_code = twi_read_reg(0x6a,WHO_AM_I ,&adxl345_id, 1 );
+  err_code = twi_read_reg(IMU_ADDRESS,WHO_AM_I ,&adxl345_id, 1 );
 
   
   if(err_code!=true){ 
@@ -207,14 +207,14 @@ void adxl345_enable(){
   
 
    imu_data = 0x3c;
-   twi_write_reg(0x6a,0x11 ,&imu_data, 1);
+   twi_write_reg(IMU_ADDRESS,0x11 ,&imu_data, 1);
     if(err_code!=true){
       while(1);
     }
 
 
    imu_data = 0x38;
-   twi_write_reg(0x6a,0x10 ,&imu_data, 1);
+   twi_write_reg(IMU_ADDRESS,0x10 ,&imu_data, 1);
     if(err_code!=true){
       while(1);
     }
@@ -225,12 +225,12 @@ void adxl345_enable(){
 
   nrf_delay_ms(50);
 
- err_code = twi_read_reg(0x6a,0x10 ,&BW_RATE, 1 );
+ err_code = twi_read_reg(IMU_ADDRESS,0x10 ,&BW_RATE, 1 );
   if(err_code!=true){
     while(1);
   }
   
-   err_code = twi_read_reg(0x6a,0x12 ,&BW_RATE, 1 );
+   err_code = twi_read_reg(IMU_ADDRESS,0x12 ,&BW_RATE, 1 );
   if(err_code!=true){
     while(1);
   }
@@ -243,7 +243,7 @@ static adxl345_acc_t adxl345_acc;
 adxl345_acc_t adxl345_get_axis(){
 
   uint8_t err_code;
-  err_code = twi_read_reg(0x6a,0x28,axis,6 );
+  err_code = twi_read_reg(IMU_ADDRESS,0x28,axis,6 );
   //return ((int16_t)(axis[0])&0x00ff + (int16_t)(axis[1]<<8));
 
   adxl345_acc.x = ((int16_t)axis[0]) + (((int16_t)axis[1])<<8);

@@ -29,7 +29,7 @@
 
 MDBT50Q  nRF52833
 
-![](images/MDBT50Q.jpg)
+<img src="images/MDBT50Q.jpg" style="zoom:50%;" />
 
 ## 韌體架構圖
 
