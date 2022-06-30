@@ -92,6 +92,7 @@
 #include "task.h"
 #include "semphr.h"
 #include "nrf_drv_power.h"
+#include "string.h"
 
 #include "motion_service.h"
 #include "info_service.h"
@@ -1078,7 +1079,7 @@ void notify_thread(void *p){
     
     count++;
     if(count % 15 == 0){
-      ble_motion_raw_notify(&m_bmwseat,(uint8_t*)vec_16, sizeof(vec_16));
+      
       breath++;
       i+=dir_i;
       j+=dir_j;
@@ -1128,7 +1129,7 @@ void notify_thread(void *p){
 }
 
 
-
+uint8_t usb_buf[255];
 void data_process(){
 //     imu_flush();
 //   imu_flip();
@@ -1156,6 +1157,13 @@ nrf_gpio_pin_toggle(CLK);
     //nrf_gpio_pin_set(CLK);
 
     adxl345_acc = adxl345_get_axis();
+    ble_motion_raw_notify(&m_bmwseat,(uint8_t*)&adxl345_acc, sizeof(adxl345_acc));
+    memset(usb_buf,0,255);
+    sprintf(usb_buf,"%d, %d, %d\r\n",adxl345_acc.x,adxl345_acc.y,adxl345_acc.z);
+    ret_code_t ret = app_usbd_cdc_acm_write(&m_app_cdc_acm,
+                                                (uint8_t*)usb_buf,
+                                                strlen(usb_buf));
+
     //if(i%12==0){
     //  i=1;
     //}
@@ -1198,7 +1206,7 @@ int main(void)
     }
 #endif
 
-/*
+
  if (pdPASS != xTaskCreate(usbd_thread,
                             "usbd",
                             USBD_STACK_SIZE,
@@ -1209,7 +1217,7 @@ int main(void)
         APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
     }
     NRF_LOG_INFO("USBD BLE UART example started.");
-*/
+
 
 
  if (pdPASS != xTaskCreate(notify_thread,
