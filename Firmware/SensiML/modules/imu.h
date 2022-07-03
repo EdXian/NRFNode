@@ -30,7 +30,8 @@
 #define SENSOR_NUMS 11
 #define TWI_INSTANCE_ID          1
 #define BMP085_ADDR   (0xEE>>1)
-
+#pragma pack(push) 
+#pragma   pack(4) 
 
 typedef struct acc{
 
@@ -49,6 +50,7 @@ typedef struct gyro{
 
 }gyro_t;
 
+#pragma pack(pop) 
 
 typedef acc_t adxl345_acc_t;  
 

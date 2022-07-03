@@ -92,6 +92,7 @@
 #include "task.h"
 #include "semphr.h"
 #include "nrf_drv_power.h"
+#include "string.h"
 
 #include "motion_service.h"
 #include "info_service.h"
@@ -756,8 +757,41 @@ static void log_init(void)
 
 // USB CODE START
 static bool m_usb_connected = false;
+/*
+#define JSONCONFIG\
+"{                                   \
+  \"sample_rate\":100,               \
+    \"version\":1,                  \
+    \"samples_per_packet\":6,      \
+    \"column_location\":{        \
+        \"AccelerometerX\":0,      \
+        \"AccelerometerY\":1,      \
+        \"AccelerometerZ\":2,      \
+        \"GyroscopeX\":3,\
+        \"GyroscopeY\":4,\
+        \"GyroscopeZ\":5\
+    }                               \
+}\r\n                                   \
+"
+*/
 
+#define JSONCONFIG\
+"{                                   \
+  \"sample_rate\":50,               \
+    \"version\":1,                  \
+    \"samples_per_packet\":6,      \
+    \"column_location\":{        \
+        \"AccelerometerX\":0,      \
+        \"AccelerometerY\":1,      \
+        \"AccelerometerZ\":2      \
+    }                               \
+}\r\n                                   \
+"
 
+uint8_t jsonconfig[]=JSONCONFIG;
+static uint8_t usbjsonconfig = 0;
+
+static bool sensiml_jsonsconfig = false;
 /** @brief User event handler @ref app_usbd_cdc_acm_user_ev_handler_t */
 static void cdc_acm_user_ev_handler(app_usbd_class_inst_t const * p_inst,
                                     app_usbd_cdc_acm_user_event_t event)
@@ -777,6 +811,8 @@ static void cdc_acm_user_ev_handler(app_usbd_class_inst_t const * p_inst,
             APP_ERROR_CHECK(ret);
             bsp_board_led_on(LED_CDC_ACM_CONN);
             NRF_LOG_INFO("CDC ACM port opened");
+            
+            sensiml_jsonsconfig=true;
             break;
         }
 
@@ -789,6 +825,8 @@ static void cdc_acm_user_ev_handler(app_usbd_class_inst_t const * p_inst,
                                                  (void *) LED_CDC_ACM_CONN);
                 APP_ERROR_CHECK(ret);
             }
+            sensiml_jsonsconfig = false;
+            usbjsonconfig=0;
             break;
 
         case APP_USBD_CDC_ACM_USER_EVT_TX_DONE:
@@ -1078,7 +1116,7 @@ void notify_thread(void *p){
     
     count++;
     if(count % 15 == 0){
-      ble_motion_raw_notify(&m_bmwseat,(uint8_t*)vec_16, sizeof(vec_16));
+      
       breath++;
       i+=dir_i;
       j+=dir_j;
@@ -1128,14 +1166,14 @@ void notify_thread(void *p){
 }
 
 
-
+uint8_t usb_buf[255];
 void data_process(){
 //     imu_flush();
 //   imu_flip();
 //   imu_flop();
 //imu_flop();
 
-uint8_t i=1;
+uint16_t i=0;
  imu_gpio_init();
  nrf_gpio_pin_clear(CLK);
 nrf_gpio_pin_clear(SAB);
@@ -1146,23 +1184,53 @@ nrf_gpio_pin_toggle(CLK);
 nrf_gpio_pin_toggle(CLK);
   imu_init();
   adxl345_enable();
+  float x,y,z;
   while(1){
-  
-    //imu_flush();
+    if(sensiml_jsonsconfig){
+      //imu_flush();
     //imu_flip();
     //imu_flop();
     //nrf_gpio_pin_toggle(SAB);
     
     //nrf_gpio_pin_set(CLK);
+    if(usbjsonconfig==0){
+    vTaskDelay(3000);
+        app_usbd_cdc_acm_write(&m_app_cdc_acm,
+                                  (uint8_t*)jsonconfig,
+                                  strlen(jsonconfig));
+        vTaskDelay(1000);
+        usbjsonconfig++;
+    }else{
+          adxl345_acc = adxl345_get_axis();
+        ble_motion_raw_notify(&m_bmwseat,(uint8_t*)&adxl345_acc, sizeof(adxl345_acc));
+        memset(usb_buf,0,255);
 
-    adxl345_acc = adxl345_get_axis();
+//        x = 1*cos(2*3.14159/0.7*i);
+        //y = 1*cos(2*3.14159/0.3*i);
+        //z = 1*cos(2*3.14159/0.9*i);
+       // sprintf(usb_buf,"%d, %d, %d, %d, %d, %d\r\n",1,2,3,3,4,5,6);
+
+        ret_code_t ret = app_usbd_cdc_acm_write(&m_app_cdc_acm,
+                                                    (uint8_t*)&adxl345_acc,
+                                                    sizeof(adxl345_acc));
+        vTaskDelay(20);
+    }
+    
+
+    
+
+    
+
     //if(i%12==0){
     //  i=1;
     //}
     //select_imu(i);
 
     i++;
-    vTaskDelay(20);
+    
+    
+    }
+    
   
   }
 
@@ -1198,7 +1266,7 @@ int main(void)
     }
 #endif
 
-/*
+
  if (pdPASS != xTaskCreate(usbd_thread,
                             "usbd",
                             USBD_STACK_SIZE,
@@ -1209,7 +1277,7 @@ int main(void)
         APP_ERROR_HANDLER(NRF_ERROR_NO_MEM);
     }
     NRF_LOG_INFO("USBD BLE UART example started.");
-*/
+
 
 
  if (pdPASS != xTaskCreate(notify_thread,
